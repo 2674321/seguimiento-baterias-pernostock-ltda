@@ -9,6 +9,7 @@ authors:
 version: "1.0"
 date-released: "2024-02-06"
 type: software
+license: MIT
 keywords:
   - "ruby"
   - "gtk3"
