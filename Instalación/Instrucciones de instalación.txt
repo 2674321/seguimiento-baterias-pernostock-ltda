@@ -1,0 +1,71 @@
+
+Instrucciones de Instalación para Ruby y Gemas (Fecha: 06-02-2024):
+
+
+
+Previo a instalación:
+
+- Desactivar el antivirus para evitar problemas.
+
+
+Instalación de Ruby Devkit :
+
+1. Descarga e instalación de ruby:
+
+
+   DESCARGAR (OPCIONAL):
+
+   - Si es necesario, visita [la página de descargas de RubyInstaller](https://rubyinstaller.org/downloads/archives//) y encuentra la versión   Ruby+Devkit 3.2.2-1 (x64)   Ruby Devkit.
+
+   - Descargaras el instalador, como `rubyinstaller-devkit-3.2.2-1-x64.exe`.
+
+   Instalación:
+
+   - Dirígete a la carpeta (Instalación) dentro de la carpeta del programa y luego a la subcarpeta (Instaladores).
+
+   - Una vez dentro encontrarás el archivo: `rubyinstaller-devkit-3.2.2-1-x64.exe`.
+
+   - Ejecutarás el instalador.
+
+   - Selecciona "Install for me only (recommended)".
+
+   - Selecciona "I accept the License".
+
+   - Debajo de la selección de la Ruta verás 2 opciones "Add Ruby executables to your PATH" y "Associate .rb and rbw files with this Ruby Installation". Verificarás si ambos están marcados, de lo contrario márcalos.
+
+   - Presiona "Install".
+
+   - En la siguiente ventana verifica que ambas opciones estén marcadas, de lo contrario márcalos.
+
+   - Presiona "Next".
+
+   - Presiona "Finish".
+
+   - En la siguiente ventana digitaras lo siguiente o cópialo y pégalo: 1,3 y presiona Enter.
+
+   - Una vez finalizada la Instalación presiona Enter.
+   
+ 
+   Configuración de Gemas:
+
+2. Copiar el contenido de GEMFILE.txt:
+
+   - Abre `GEMFILE.txt` con un editor de texto y copia su contenido.
+
+
+3. Instalación de Gemas:
+
+   - Abre la consola de comandos (cmd) como administrador.
+
+   - Pega el contenido de `GEMFILE.txt` en la consola y presiona enter.
+
+   - Sigue las instrucciones de los instaladores si es pedido.
+
+   - Una vez completada la instalación Correctamente, puedes iniciar tu programa sin problemas.
+
+-------------------------------------------------------------------------------------------------
+
+Estas instrucciones proporcionan un paso a paso para la instalación de Ruby y Gemas, que son necesarias para que el programa funcione.
+
+Espero que estas instrucciones sean de utilidad. 
+Patricio Varela C.

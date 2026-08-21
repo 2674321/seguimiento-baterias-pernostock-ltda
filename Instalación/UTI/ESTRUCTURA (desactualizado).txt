@@ -1,0 +1,472 @@
+Estructura General Seguimiento baterias (desactualizado)
+
+Explicación general y planificacion del programa 16-1-2024
+
+
+main.rb
+
+Este archivo controla el inicio del programa y gestiona sus requisitos esenciales. 
+Además, actúa como el ejecutador principal del programa.
+
+Considerar la implementación de un seguimiento en tiempo real del estado de las baterías, por ejemplo, utilizando hilos o procesos en segundo plano.
+
+------- Archivos, Relativos y Gemas/Bibliotecas:
+
+Archivos, rutas relativas y gemas/bibliotecas requeridas para el funcionamiento del programa.
+
+require 'gtk3'
+
+load 'reemplazo_de_datos'
+require_relative 'constants'
+require_relative 'history_helper'
+require_relative 'database_operations' # [Crea la base de datos sus tablas y la conexion]
+require_relative 'interface_setup'     # [Inicia la interfaz principal de programa]
+require_relative 'datos_principales_base'
+-----------------------------------------------------------------
+
+interface_setup.rb
+
+Esta ventana principal permite el acceso a otras ventanas y las funciones que posee el programa. 
+
+Permite ingresar a Copia de seguridad, Buscar, Guardar, Editar, Salir y Registro.
+
+Funciones de la ventana: 
+ Buscador de bateria (input y boton), 
+ Menu deplegable (Seleccion de Columnas),
+ Menu desplegable 2 (Menu de busqueda Rapida Criterios:(modelo, vendedor, cliente, Rango fechas)
+
+------- Archivos, Relativos y Gemas/Bibliotecas:
+
+main.rb
+
+require 'gtk3'
+require 'date'
+
+require_relative 'utilities'      
+require_relative 'registration_window'   # [Ventan de registro de datos]
+require_relative 'backup_window'         # [Ventana de copia de seguridad manual]
+require_relative 'criteria_menu'         # [Menu de busqueda avanzada]
+require_relative 'constants'             
+require_relative 'edit_window'           # [Ventana de edicion de datos]
+require_relative 'history_helper'        # [cargado previamente]
+require_relative 'message_helper'      
+require_relative 'database_operations'   # [Carga todo lo necesario de la base de datos]
+require_relative 'search_logic'          # [Logica para la busqueda de la ventana principal]
+-----------------------------------------------------------------
+
+message_helper.rb
+
+Este código contiene un método estandarizado para mostrar mensajes (ventanas emergentes).
+
+------- Archivos, Relativos y Gemas/Bibliotecas:
+
+require 'gtk3'
+
+# [Archivos que lo utilizan]
+history_helper
+history_window
+reemplazo_de_datos
+interface_setup
+edit_windowr
+search_logic 
+-----------------------------------------------------------------
+
+reemplazo_de_datos.rb
+
+Este código se encarga de reemplazar los datos editados en la ventana de edición, actualizando la base de datos.
+
+
+------- Archivos, Relativos y Gemas/Bibliotecas:
+
+edit_window.rb                   # [Donde sucede la edicion de los datos]
+edit_validation.rb               # [proteje la integridad de los datos]
+edit_window_interface.rb         # [Carga la interfaz]
+main.rb      
+
+require_relative 'constants'
+
+require 'sqlite3'
+-----------------------------------------------------------------
+
+registration_window.rb
+
+Este código contiene la interfaz de la ventana de registro y la lógica de recopilación de datos, 
+además de llamar a save_registration_window.rb (lógica de registro).
+
+------- Archivos, Relativos y Gemas/Bibliotecas:
+
+
+save_registration_window.rb (Modulo con la logica para registrar en la base de datos)
+
+interface_setup.rb
+
+require 'date'                                  # [Para agregar h-m-s / ya no se usa]
+require_relative 'constants'                    
+require_relative 'database_operations'          # [conexion con base de datos]
+require_relative 'modulo_registro_de_baterias'  # [llama la logica para registrar los datos]
+-----------------------------------------------------------------
+
+save_registration_window.rb
+
+Este código está encargado del ingreso de nuevos datos a la base de datos, parte lógica.
+
+------- Archivos, Relativos y Gemas/Bibliotecas:
+
+llamado por registration_window.rb
+
+require_relative 'database_operations'
+require 'date'
+-----------------------------------------------------------------
+
+search-logic.rb
+
+Este código se encarga de la búsqueda, formato de los resultados en el buscador
+de la ventana principal y configuración de la conexión de los botones.
+
+
+------- Archivos, Relativos y Gemas/Bibliotecas:
+
+interface_setup.rb
+
+require_relative 'database_operations'
+require_relative 'message_helper'
+-----------------------------------------------------------------
+
+utilities.rb
+
+Este código contiene varios métodos variados,
+principalmente usados en la ventana principal (validadores, guardado de resultados, extensiones, etc.).
+
+Archivos, Relativos y Gemas/Bibliotecas:
+----------------------------------------------------------------
+
+edit window.rb  
+
+Codigo encargado con la interfaz de la ventana de edicion ademas de la logica de busqueda y llama al modulo reemplazar_datos al presionar el boton de guardar
+(falta implementar la logica para ingreso de datos en en la tabla del registro de cambios (historial))
+
+------- Archivos, Relativos y Gemas/Bibliotecas:
+
+
+require_relative 'constants'
+require_relative 'reemplazo_de_datos' # [Inserta los datos principales en tabla_de_datos]
+require_relative 'history_helper'
+require_relative 'edit_window_interface' 
+require_relative 'edit_validation'
+require_relative 'edit_window_history_data_insert_module'# [Inserta los datos del historial]
+-----------------------------------------------------------------
+
+edit_window_history_data_insert_module.rb
+
+Este código se encarga de insertar los datos que se muestran en el historial (tabla_de_registro).
+
+------- Archivos, Relativos y Gemas/Bibliotecas:
+
+edit_window.rb
+-----------------------------------------------------------------
+
+edit_window_interface.rb
+Codigo que posee la totalidad interfaz de edit_window.rb excluyendo la ventana de historial, la cual la posee history_window.
+
+------- Archivos, Relativos y Gemas/Bibliotecas:
+
+edit_window.rb
+-----------------------------------------------------------------
+
+database_operations.rb
+
+
+Codigo encargado de la Creación, configuracion, validacion, de las tablas y base de datos.
+
+Posee el modulo encargado de insertar baterias en la base de datos
+
+------- Archivos, Relativos y Gemas/Bibliotecas:
+
+search_logic.rb
+save_registration_window.rb
+registration_window.rb
+main.rb
+interface_setup.rb
+
+require 'sqlite3'
+
+require_relative 'constants'
+-----------------------------------------------------------------
+
+constants.rb
+
+Codigo que define las constantes de las tablas en modulos y otras variables.
+
+------- Archivos, Relativos y Gemas/Bibliotecas:
+
+backup_window.rb
+constants.rb
+database_operations.rb
+edit_window.rb
+interface_setup.rb
+main.rb
+reemplazo_de_datos.rb
+registration_window.rb
+search_logic.rb
+
+require 'sqlite3'
+-----------------------------------------------------------------
+
+backup_window.rb
+
+Codigo encargado de la logica e interfaz de la ventana de copia de seguridad (base de datos)
+
+------- Archivos, Relativos y Gemas/Bibliotecas:
+
+interface_setup.rb
+search_logic.rb
+
+require 'gtk3'
+require 'sqlite3'
+require 'fileutils'
+
+require_relative'constants'
+-----------------------------------------------------------------
+
+backup_window_logic.rb 
+
+Contiene la logica del guardado manual y algunos implementos GUI.
+
+------- Archivos, Relativos y Gemas/Bibliotecas:
+
+backup_window.rb
+-----------------------------------------------------------------
+
+backup_exit.rb
+
+Codigo que se encarga de hacer una copia de seguirdad cada vez que se sale del programa,
+
+------- Archivos, Relativos y Gemas/Bibliotecas:
+
+backup_window.rb
+
+-----------------------------------------------------------------
+
+base_de_datos.db
+
+Este archivo contiene la base de datos del programa en SQL.
+
+------- Archivos, Relativos y Gemas/Bibliotecas:
+
+main.rb
+database_operations.rb
+constants.rb
+backup_window.rb
+-----------------------------------------------------------------
+
+criteria_menu_logic.rb 
+
+Este código contendrá la lógica del menú de herramientas.
+
+------- Archivos, Relativos y Gemas/Bibliotecas:
+
+criteria_menu.rb
+
+-----------------------------------------------------------------
+criteria_menu_validator.rb 
+
+Este código posee los validadores de los inputs de las ventanas de búsqueda rápida.
+
+------- Archivos, Relativos y Gemas/Bibliotecas:
+
+criteria_menu.rb
+
+-----------------------------------------------------------------
+criteria_menu_interface.rb 
+
+Este código posee la interfaz del menú de criterio/búsqueda rápida, en ventana principal.
+
+------- Archivos, Relativos y Gemas/Bibliotecas:
+
+criteria_menu.rb
+
+-----------------------------------------------------------------
+
+criteria_menu.rb (Sin logica)
+
+Este código contiene la interfaz del menú de herramientas (búsqueda rápida y avanzada).
+
+Mejora:
+
+Hacer que modelos pueda buscar varios modelos a la vez en búsqueda rápida.
+
+
+------- Archivos, Relativos y Gemas/Bibliotecas:
+
+interface_setup.rb 
+criteria_menu_interface.rb
+criteria_menu_logic.rb
+criteria_menu_validator.rb
+
+require 'gtk3'
+
+-----------------------------------------------------------------
+
+(Carpeta) archivos_guardados
+
+Esta carpeta contiene los resultados guardados de la búsqueda de la ventana principal.
+
+Mejora: Hacer que guarde los archivos correspondientes a la carpeta y extensión.
+
+------- Archivos, Relativos y Gemas/Bibliotecas:
+
+interface_setup.rb
+search_logic.rb
+-----------------------------------------------------------------
+
+(Carpeta) copias_de_seguridad
+
+Esta carpeta contiene las copias de seguridad manuales y automáticas.
+
+------- Archivos, Relativos y Gemas/Bibliotecas:
+
+backup_window.rb
+backup_exit.rb
+backup_window_logic.rb
+-----------------------------------------------------------------
+
+modulo_registro_baterias.rb  
+
+Este código contiene la lógica para el registro de nuevas baterías.
+
+------- Archivos, Relativos y Gemas/Bibliotecas:
+
+registration_window.rb
+-----------------------------------------------------------------
+
+history_data 
+
+Código que contiene datos de prueba para el historial de baterías.
+
+------- Archivos, Relativos y Gemas/Bibliotecas:
+
+history_helper.rb
+edit_window
+edit_window_history_data_insert_module
+-----------------------------------------------------------------
+
+history_search 
+
+Código que contiene la lógica para el buscador de la ventana del historial de cambios de las baterias.
+
+------- Archivos, Relativos y Gemas/Bibliotecas:
+
+history_helper.rb
+-----------------------------------------------------------------
+
+history_window
+
+Este código contiene la interfaz del historial de baterías, que facilita la visualización de todos los cambios realizados.
+Permite buscar una batería específica para mostrar todas sus ediciones anteriores.
+
+------- Archivos, Relativos y Gemas/Bibliotecas:
+
+history_helper.rb
+
+require_relative 'history_data'
+require_relative 'history_search'
+require_relative 'message_helper'
+require 'gtk3'
+-----------------------------------------------------------------
+
+history_helper.rb
+
+Iniciador principal de todo lo relacionado con el historial de baterias
+
+------- Archivos, Relativos y Gemas/Bibliotecas:
+
+edit_window.rb (Se ingresa desde aqui a la ventana de historial)
+
+require_relative 'history_data'
+require_relative 'history_window'
+require_relative 'history_search'
+
+interface_setup.rb
+edit_window_history_data_insert_module.rb
+
+-----------------------------------------------------------------
+(Archivo) README.txt 
+
+Archivo que contiene información sobre cómo el funcionamiento del programa, caracteristicas,archivos, instalación, ejecución, utilización,etc de el programa.
+
+-----------------------------------------------------------------
+(Archivo) ESTRUCTURA.txt 
+
+Es una planificación con la estructura del programa y sus mejoras y errores pendientes.
+
+-----------------------------------------------------------------
+
+(Archivo) Gemfile.bash
+
+Es un gemfile con las gemas que utiliza el programa.
+
+-----------------------------------------------------------------
+
+* = OBLIGATORIO  (Campos requeridos para registro de datos)
+
+Estructura Base de datos:
+
+base_de_datos.db
+
+(Tabla encargada de Contener y Recibir los datos de la ventana de (REGISTRO Y EDICION), esta es la tabla principal)
+
+tabla_de_datos:
+
+    ID INTEGER PRIMARY KEY AUTOINCREMENT,   (Se le asigna una id a cada bateria una vez registrada (Por temas de logica) )
+  * MODELO TEXT NULL,                       (Modelo de la bateria)
+  * SERIE TEXT NULL,                        (Serie de la bateria)
+  * RECEPCION TEXT NULL,                    (Fecha de recepción de la bateria)
+  * FACTURA TEXT NULL,                      (Num. Factura de la bateria)
+    FECHA_C TEXT NULL,                      (Fecha del credito de la bateria)
+  * NC INTEGER NULL,                        (Num. Nota de credito de la bateria)
+    FECHA_NC TEXT NULL,                     (Fecha de la Nota de Credito la bateria)
+    MOTIVO TEXT NULL,                       (Motivo de la devolucion de la bateria)
+  * CLIENTE TEXT NULL,                      (Nombre y Apellido del cliente de la bateria)
+  * VENDEDOR TEXT NULL,                     (Nombre y apellido Vendedor de la bateria)          
+    RECARGA TEXT NULL,                      (Estado de la recarga de la bateria)
+    FECHA_ENVIO TEXT NULL,                  (Fecha  de Envio de la bateria)
+    DESTINO TEXT NULL,                      (Lugar de Destino de la bateria)
+    COMENTARIOS TEXT NULL,                  (Comentarios, Consideraciones, Advertencias, etc. sobre la bateria )
+
+    CONSTRAINT modelo_serie_recepcion_unique UNIQUE (MODELO, SERIE, RECEPCION)        (DATO PARA EVITAR REPETICION DE BATERIAS / PENDIENTE EDICION)
+
+
+(Tabla encargada de Contener y Recibir los datos de la ventana de edicion para poder crear el historial de cambios)
+
+tabla_de_registro:
+
+    ID INTEGER PRIMARY KEY AUTOINCREMENT,                   (ID propia de los datos de edicion.)
+    FECHA_HORA TEXT,                                        (Fecha y hora de la edicion de los datos)
+    CAMPO_MODIFICADO TEXT,                                  (Campo que fue modificado)
+    VALOR_ANTERIOR TEXT,                                    (Valor anterior a la modificacion)
+    VALOR_NUEVO TEXT,                                       (Valor actual con el cual fue reemplazado)
+    RAZON_CAMBIO TEXT,                                      (Comentario con el motivo del cambio de los datos)
+    ID_BATERIA INTEGER,                                     (ID de la tabla tabla_de_datos)
+
+    FOREIGN KEY (ID_BATERIA) REFERENCES tabla_de_datos(ID)  (Relacion Foreing Key)
+
+MEJORAS y ERRORES:
+
+criteria_menu.rb
+  - Mejora: agregar mas de 1 input o alguna otra manera para hacer que los criterios puedan ser buscados con mas de 1 valor a la vez.
+
+edit_window.rb 
+  - Hacer que el buscador edit_window funcione con la Nota de credito e ID.
+
+registration_window.rb
+  - Agregar un boton para permitir el ingreso de las h-m-s al formato principal (aaaa/mm/dd) a aaaa/mm/dd 12:30:00 
+  - Agregar formato para que se ingrese minimo el nombre y apellido. (En cliente y vendedor)
+  - Falta decidir un formato estandarizado para el ingreso del estado de recarga. ( EJ 1: CARGADO / DESCARGADO  EJ 2: SI/ NO)
+  - Decidir los campos que son Obligatorios
+
+base_de_datos.db
+  - Cambiar las varibles que usa a una mas correcta y efectiva (modelo_serie_recepcion_unique)
+
+General:
+  - Hacer que las ventanas y Ventanas emergentes aparescan en mitad de la pantalla por comodidad.
+  - Agregar tooltip a las partes que lo necesiten.

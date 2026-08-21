@@ -1,0 +1,22 @@
+# Artefactos del editor Ruby
+.ruby-lsp/
+
+# Accesos directos Windows
+*.lnk
+
+# Datos en tiempo de ejecución (se regeneran al usar la app)
+Seguimiento baterias/base_de_datos.db
+Seguimiento baterias/archivos_guardados/
+Seguimiento baterias/Copias_de_seguridad/copias_de_seguridad_manual/
+Seguimiento baterias/Copias_de_seguridad/copia_de_seguridad_automatica/
+Seguimiento baterias/Copias_de_seguridad/Copias_de_seguridad_temporizadas/
+Seguimiento baterias/Ultimas_operaciones.yaml
+Seguimiento baterias/Ultima_operacion.yaml
+Seguimiento baterias/Ultima_copia_de_seguridad_automatica.yaml
+Seguimiento baterias/counter.yaml
+Instalación/UTI/Datos base.db
+Instalación/UTI/Datos base.rar
+
+# Sistema operativo
+Thumbs.db
+.DS_Store

@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "Si utiliza este trabajo, por favor cítelo."
+title: "Seguimiento de Baterías: sistema de escritorio para gestión y control de baterías (Ruby/GTK3/SQLite)"
+authors:
+  - family-names: Varela
+    given-names: Patricio
+    alias: CA2OPX
+    orcid: https://orcid.org/0009-0002-1087-9445
+version: "1.0"
+date-released: "2024-02-06"
+type: software
+keywords:
+  - "ruby"
+  - "gtk3"
+  - "sqlite"
+  - "gestion-de-inventario"
+abstract: "Aplicación de escritorio desarrollada en Ruby con GTK3 y SQLite para el seguimiento de baterías: registro, búsqueda, historial, estadísticas y copias de seguridad. Proyecto de formación técnica (2024)."
+repository-code: "https://github.com/2674321/seguimiento-baterias"

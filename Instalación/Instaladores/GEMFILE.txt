@@ -1,0 +1,34 @@
+1. Abre el (Simbolo de sistema) como Administrador.
+
+2. Copia y pega 1 de estos 2 textos en el CMD (Simbolo de sistema):
+
+
+1.(Recomendado)
+
+
+gem install pristine fileutils 
+gem install pristine  gtk3 
+gem install pristine sqlite3 
+gem install pristine date
+gem install pristine yaml
+gem install pristine glib2
+gem pristine install csv
+gem pristine install axlsx
+echo instalacion terminada.
+
+
+
+
+2.
+
+cmd /k gem install fileutils 
+cmd /k gem install gtk3 
+cmd /k gem install sqlite3 
+cmd /k gem install date
+cmd /k gem install yaml
+cmd /k gem install write_xlsx
+cmd /k gem install glib2
+cmd /k gem install csv
+cmd /k gem install axlsx
+echo instalacion terminada.
+

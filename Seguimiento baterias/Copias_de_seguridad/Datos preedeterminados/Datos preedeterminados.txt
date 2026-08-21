@@ -1,0 +1,3 @@
+Esta es una copia actualizada de la base de datos principal utilizada en el programa, que incluye los últimos datos de las baterías extraídos de los archivos "Copia de RECEPCION 2024.xlsx" y "Copia RECEP BATERIAS DICIEMBRE.xlsx".
+
+06-02-2024
