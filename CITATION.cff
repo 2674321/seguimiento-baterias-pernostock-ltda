@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "Si utiliza este trabajo, por favor cítelo."
-title: "Seguimiento de Baterías: sistema de escritorio para gestión y control de baterías (Ruby/GTK3/SQLite)"
+title: "Seguimiento de Baterías — Pernostock Ltda: sistema de escritorio para gestión y control de baterías (Ruby/GTK3/SQLite)"
 authors:
   - family-names: Varela
     given-names: Patricio
@@ -15,4 +15,4 @@ keywords:
   - "sqlite"
   - "gestion-de-inventario"
 abstract: "Aplicación de escritorio desarrollada en Ruby con GTK3 y SQLite para el seguimiento de baterías: registro, búsqueda, historial, estadísticas y copias de seguridad. Proyecto de formación técnica (2024)."
-repository-code: "https://github.com/2674321/seguimiento-baterias"
+repository-code: "https://github.com/2674321/seguimiento-baterias-pernostock-ltda"
