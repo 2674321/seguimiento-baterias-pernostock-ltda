@@ -5,7 +5,6 @@ require_relative 'statistics_logic'
 require_relative 'constants'
 require_relative 'database_operations'
 require_relative 'interface_setup'
-require_relative 'constants'
 require_relative 'history_helper'
 require_relative 'battery_window'
 require_relative 'registration_window'
@@ -16,17 +15,12 @@ def insert_initial_data_if_needed(data)
   begin
     loading_window = show_loading_window(5)
     db = SQLite3::Database.new(NOMBRE_DB)
-    db_created = false
-    unless db_created
-      configurar_base_de_datos
-      db_created = true
-    end
+    configurar_base_de_datos
     unless check_initial_data_inserted(db, data)
       insertar_datos(db, data)
     end
-    loading_window.signal_connect('destroy') do |_|
-      create_interface(Constants::TablaDeDatos::COLUMN_NAMES)
-    end
+    create_interface(Constants::TablaDeDatos::COLUMN_NAMES)
+    loading_window.destroy unless loading_window.destroyed?
     Gtk.main
   rescue StandardError => e
     puts e.backtrace
