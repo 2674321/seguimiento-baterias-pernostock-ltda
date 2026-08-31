@@ -1,0 +1,31 @@
+# Artefactos del editor / entorno Ruby
+.ruby-lsp/
+.vscode/
+desktop.ini
+Thumbs.db
+
+# Accesos directos Windows
+*.lnk
+
+# Bundler local
+.bundle/
+
+# Datos reales de PernoStock — NO versionar
+Copias_de_seguridad/Datos preedeterminados/base_de_datos.db
+
+# Datos en tiempo de ejecución (se regeneran al usar la app)
+base_de_datos.db
+archivos_guardados/
+Copias_de_seguridad/copias_de_seguridad_manual/
+Copias_de_seguridad/copia_de_seguridad_automatica/
+Copias_de_seguridad/Copias_de_seguridad_temporizadas/
+Ultimas_operaciones.yaml
+Ultima_operacion.yaml
+Ultima_copia_de_seguridad_automatica.yaml
+counter.yaml
+
+# Pruebas / temporales
+tmp/
+
+# Sistema operativo
+.DS_Store
