@@ -24,10 +24,10 @@ require_relative 'save_button_principal'
 def create_interface(columns)
   configuracion = ConfiguracionCopiaSeguridad.new
   configuracion.start_backup_logic
+  @_config_copia_seguridad = configuracion
   window = Gtk::Window.new('Ventana principal de búsqueda')
   window.set_position(Gtk::WindowPosition::CENTER)
   window.set_size_request(400, 450)
-  window.signal_connect('destroy') { Gtk.main_quit }
   main_box = Gtk::Box.new(:vertical, 5)
   window.add(main_box)
   search_box = Gtk::Box.new(:horizontal, 5)
@@ -72,7 +72,6 @@ def create_interface(columns)
   exit_icon = Gtk::Image.new(icon_name: "application-exit", icon_size: Gtk::IconSize::BUTTON)
   exit_button.set_image(exit_icon)
   exit_button.set_tooltip_text('Cierra el programa.')
-  exit_button.signal_connect('clicked') { Gtk.main_quit }
   result_box.pack_start(scroll, expand: true, fill: true, padding: 5)
   result_box.pack_start(buttons_box, expand: false, fill: true, padding: 5)
   edit_button.signal_connect('clicked') do
@@ -116,12 +115,13 @@ def create_interface(columns)
   registration_button.set_margin_right(50)
   search_buttons.each { |btn| buttons_box.pack_start(btn, expand: true, fill: true, padding: 5) }
   exit_button.signal_connect('clicked') do
-    Gtk.main_quit
+    window.destroy
   end
   window.signal_connect('destroy') do
-    BackupAndExit.backup_exit
+    @_config_copia_seguridad&.stop_backup_logic
+    BackupAndExit.run_automatic_backup
     Gtk.main_quit
   end
   window.show_all
-  Gtk.main
+  window
 end

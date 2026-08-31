@@ -5,6 +5,8 @@ class ConfiguracionCopiaSeguridad
   def initialize
     @intervalo_tiempo = 30
     @activar_al_inicio = true
+    @backup_thread = nil
+    @stop_backup = false
     load_configuration
   end
   def load_configuration
@@ -35,6 +37,11 @@ class ConfiguracionCopiaSeguridad
   def start_backup_logic
     logica_configuracion_automatica if @activar_al_inicio
   end
+  def stop_backup_logic
+    @stop_backup = true
+    return unless @backup_thread
+    @backup_thread.join(1) if @backup_thread.alive?
+  end
   def interfaz
     window = Gtk::Window.new("Configuración de Copias de Seguridad")
     window.set_default_size(400, 200)
@@ -59,9 +66,12 @@ class ConfiguracionCopiaSeguridad
   end
   private
   def logica_configuracion_automatica
-    Thread.new do
+    @stop_backup = false
+    @backup_thread = Thread.new do
       loop do
+        break if @stop_backup
         realizar_copia_de_seguridad
+        break if @stop_backup
         sleep(@intervalo_tiempo * 60)
       end
     end

@@ -1,7 +1,6 @@
 require 'date'
 require 'gtk3'
 require_relative 'constants'
-require_relative 'database_operations'
 def setup_database
   SQLite3::Database.new(NOMBRE_DB)
 end
