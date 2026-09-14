@@ -24,7 +24,7 @@ def create_interface(columns)
 
   window = Gtk::Window.new('Ventana principal de búsqueda')
   window.set_position(Gtk::WindowPosition::CENTER)
-  window.set_size_request(640, 560)
+  window.set_size_request(1200, 560)
 
   revealer = Gtk::Revealer.new
   revealer.transition_type = :crossfade
@@ -65,24 +65,104 @@ def create_interface(columns)
   battery_button.set_size_request(30, 30)
   battery_button.label = "Ventana Baterias"
   battery_button.set_tooltip_text('Ventana con las Baterias Registradas.')
+  columns_button = Gtk::Button.new
+  columns_button.set_size_request(30, 30)
+  set_button_icon(columns_button, 'view-columns-symbolic')
+  columns_button.set_tooltip_text('Selecciona qué columnas mostrar en los resultados.')
   search_grid.attach(Gtk::Label.new('Buscar en:'), 0, 0, 1, 1)
   search_grid.attach(entry_serie, 1, 0, 1, 1)
   search_grid.attach(Gtk::Label.new('Columna:'), 2, 0, 1, 1)
   search_grid.attach(column_combo, 3, 0, 1, 1)
   search_grid.attach(menu_button, 4, 0, 1, 1)
   search_grid.attach(battery_button, 5, 0, 1, 1)
+  search_grid.attach(columns_button, 6, 0, 1, 1)
   main_box.pack_start(search_grid, expand: false, fill: true, padding: 4)
   battery_button.signal_connect('clicked') do
     BatteryWindow.initialize_interface
   end
 
-  result_box = Gtk::Box.new(:vertical, 5)
+  result_box = Gtk::Box.new(:vertical, 2)
   main_box.pack_start(result_box, expand: true, fill: true, padding: 4)
-  result_label = Gtk::Label.new('', wrap: true, use_markup: true)
-  result_label.selectable = true
+  status_label = Gtk::Label.new('', wrap: true, use_markup: true)
+  status_label.set_halign(:start)
+  result_box.pack_start(status_label, expand: false, fill: false, padding: 4)
+  column_db_names = columns.values
+  store = Gtk::ListStore.new(*Array.new(column_db_names.size) { String })
+  result_tree = Gtk::TreeView.new(store)
+  result_tree.set_headers_visible(true)
+  result_tree.set_rules_hint(true)
+  tree_columns = []
+  column_db_names.each_with_index do |col_name, i|
+    tc = Gtk::TreeViewColumn.new(map_column_name(col_name), Gtk::CellRendererText.new, text: i)
+    tc.set_sizing(Gtk::TreeViewColumnSizing::AUTOSIZE)
+    tc.set_min_width(60)
+    tc.set_resizable(true)
+    result_tree.append_column(tc)
+    tree_columns << tc
+  end
   scroll = Gtk::ScrolledWindow.new
   scroll.set_policy(:automatic, :automatic)
-  scroll.add(result_label)
+  scroll.add(result_tree)
+  result_box.pack_start(scroll, expand: true, fill: true, padding: 4)
+
+  columns_popover = Gtk::Popover.new(columns_button)
+  columns_popover.modal = false
+  columns_box_popover = Gtk::Box.new(:vertical, 2)
+  columns_box_popover.set_border_width(8)
+  columns_popover.add(columns_box_popover)
+  columns_title = Gtk::Label.new('<b>Columnas a mostrar</b>')
+  columns_title.use_markup = true
+  columns_title.set_halign(:start)
+  columns_box_popover.pack_start(columns_title, expand: false, fill: true, padding: 2)
+  check_buttons = []
+  bulk_toggle = false
+  select_all_check = Gtk::CheckButton.new('Seleccionar todo')
+  select_all_check.active = true
+  columns_box_popover.pack_start(select_all_check, expand: false, fill: true, padding: 2)
+  columns_scroll = Gtk::ScrolledWindow.new
+  columns_scroll.set_policy(:never, :automatic)
+  columns_scroll.set_size_request(240, 220)
+  check_list_box = Gtk::Box.new(:vertical, 2)
+  column_db_names.each_with_index do |col_name, i|
+    check = Gtk::CheckButton.new(map_column_name(col_name))
+    check.active = true
+    check.signal_connect('toggled') do
+      next if bulk_toggle
+      if check.active?
+        tree_columns[i].visible = true
+      elsif check_buttons.count(&:active?) >= 1
+        tree_columns[i].visible = false
+      else
+        check.active = true
+      end
+    end
+    check_buttons << check
+    check_list_box.pack_start(check, expand: false, fill: true, padding: 2)
+  end
+  columns_scroll.add(check_list_box)
+  columns_box_popover.pack_start(columns_scroll, expand: true, fill: true, padding: 2)
+  select_all_check.signal_connect('toggled') do
+    next if bulk_toggle
+    bulk_toggle = true
+    if select_all_check.active?
+      check_buttons.each_with_index do |check, i|
+        check.active = true
+        tree_columns[i].visible = true
+      end
+    else
+      tree_columns.each { |tc| tc.visible = false }
+      check_buttons.each { |check| check.active = false }
+      unless check_buttons.empty?
+        check_buttons.first.active = true
+        tree_columns.first.visible = true
+      end
+    end
+    bulk_toggle = false
+  end
+  columns_button.signal_connect('clicked') do
+    columns_popover.show_all
+    columns_popover.popup
+  end
 
   buttons_box = Gtk::ButtonBox.new(:horizontal)
   buttons_box.layout = Gtk::ButtonBoxStyle::EXPAND
@@ -104,7 +184,6 @@ def create_interface(columns)
   exit_button = Gtk::Button.new(label: 'Salir')
   exit_button.image = Gtk::Image.new(icon_name: "application-exit", icon_size: Gtk::IconSize::BUTTON)
   exit_button.set_tooltip_text('Cierra el programa.')
-  result_box.pack_start(scroll, expand: true, fill: true, padding: 5)
   result_box.pack_start(buttons_box, expand: false, fill: true, padding: 5)
   edit_button.signal_connect('clicked') do
     create_edit_window
@@ -120,20 +199,16 @@ def create_interface(columns)
     else
       begin
         database = setup_database
-        search_data(valor, result_label, index, columns, database)
+        search_data(valor, store, status_label, index, columns, database)
       rescue StandardError => e
-        show_message_dialog("Error", "Error en la búsqueda: #{e.message}")
+        status_label.markup = "<b>Error en la búsqueda:</b> #{e.message}"
       ensure
         database.close if database
       end
     end
   end
   search_buttons[1].signal_connect('clicked') do
-    if result_label.text.empty?
-      show_message_dialog("Advertencia", "No hay resultados para guardar.")
-    else
-      guardar_resultados(result_label, window)
-    end
+    guardar_resultados(store, window)
   end
   registration_button = Gtk::Button.new(label: 'Registro Bat.')
   set_button_icon(registration_button, 'list-add')

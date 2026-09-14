@@ -58,31 +58,26 @@ def construct_result(rows, column_names)
     end.compact.join("\n")
   end.join("\n#{separator}")
 end
-def search_data(valor, label, index, columns, db)
-  column_names = Constants::TablaDeDatos::COLUMN_NAMES.values
+def search_data(valor, store, status_label, index, columns, db)
+  column_names = columns.values
   index = index.to_i
   column_name = column_names[index]
   query = "SELECT * FROM tabla_de_datos WHERE LOWER(#{column_name}) LIKE LOWER(?)"
   begin
     rows = db.execute(query, "%#{valor.downcase}%")
+    store.clear
     if rows.empty?
-      GLib::Idle.add do
-        label.markup = "<b>No se encontró '#{valor}' en '#{column_name}'.</b>\n\n"
-        false
-      end
+      status_label.markup = "<b>No se encontró '#{valor}' en '#{map_column_name(column_name)}'.</b>"
     else
-      result = construct_result(rows, column_names)
-      GLib::Idle.add do
-        label.markup = "<b>Se encontró '#{valor}' en '#{column_name}'</b>\n\n" + result
-        contador_busqueda(column_name, valor)
-        false
+      rows.each do |row|
+        iter = store.append
+        row.each_with_index { |value, i| iter[i] = value.to_s }
       end
+      status_label.markup = "<b>Se encontraron #{rows.size} resultado(s)</b> para '#{valor}' en '#{map_column_name(column_name)}'."
+      contador_busqueda(column_name, valor)
     end
   rescue SQLite3::Exception => e
-    GLib::Idle.add do
-      handle_search_error(e)
-      false
-    end
+    status_label.markup = "<b>Error en la búsqueda:</b> #{e.message}"
   end
 end
 def contador_busqueda(column_name, valor)

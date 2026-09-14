@@ -1,8 +1,18 @@
 require 'gtk3'
 require 'fileutils'
 require_relative 'utilities'
-def guardar_resultados(result_label, window)
-  results_text = result_label.text
+require_relative 'search_logic'
+require_relative 'constants'
+def guardar_resultados(store, window)
+  if store.iter_n_children(nil) == 0
+    show_message_dialog("Advertencia", "No hay resultados para guardar.")
+    return
+  end
+  rows = []
+  store.each do |_model, _path, iter|
+    rows << (0...store.n_columns).map { |c| iter[c] }
+  end
+  results_text = construct_result(rows, Constants::TablaDeDatos::COLUMN_NAMES.values)
   dialog = Gtk::FileChooserDialog.new(
     title: 'Guardar Resultados',
     parent: window,

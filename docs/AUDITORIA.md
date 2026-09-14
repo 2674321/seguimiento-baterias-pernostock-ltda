@@ -249,7 +249,7 @@ Reforma visual y corrección del flujo de arranque, verificada con tests automat
 
 Verificación: `ruby -c` en todos los archivos; flujo de arranque completo con loading → main (ventana de carga efectivamente se pinta y se destruye al finalizar init); render X11 de las 8 ventanas con tema aplicado; app real lanzada sin errores; capturas de pantalla de loading y ventana principal verificadas; test de timeout de duración de la ventana de carga; DB semilla persistente al lanzar la app (EXIT=124 timeout esperado). 
 
-## Séptima pasada — rechazo de tema de colores + nueva dirección visual (pendiente)
+## Séptima pasada — rechazo de tema de colores + nueva dirección visual
 
 Rechazo del CSS del tema claro forzado (`app_theme.rb`) — el usuario indicó que el blanco interfería con el tema del sistema (modo oscuro). Se eliminó `app_theme.rb` y todas las llamadas a `AppTheme.install`, devolviendo la app al tema GTK nativo del sistema (respetando el dark mode). Manteniendo el color de los botones ya que el usuario los encontraba cómodos visualmente.
 
@@ -281,6 +281,73 @@ Rechazo del CSS del tema claro forzado (`app_theme.rb`) — el usuario indicó q
   - Timer de auto-destrucción eliminado; el caller (`main.rbw`) es responsable de destruir la ventana con duración mínima garantizada.
 
 Verificación: `ruby -c` todos los archivos; advertencias preexistentes (`user_manual.rb`, `write_xlsx`, requires circulares) sin cambios. Smoke headless: `show_loading_window` → ventana visible a 500ms, destroy vía timeout OK; `create_interface` → ventana principal oculta hasta que loading termina, luego `visible=true` + Revealer fade-in vía Timeout; destroy limpio sin GLib-CRITICAL. App real: capturas a 1s (solo loading) y 3s (main) con tamaños diferenciados (ausencia de superposición); DB preservada (7 filas); sin nuevos warnings.
+
+## Octava pasada — TreeView de resultados + Import/Export
+
+**Reemplazo del result_label por TreeView con ListStore**
+- `interface_setup.rb`: el `Gtk::Label` (`result_label`) en el scroll fue reemplazado por un `Gtk::TreeView` con un `Gtk::ListStore` de 15 columnas String (`column_db_names = columns.values`). Cada columna tiene un `Gtk::TreeViewColumn` con header legible (`map_column_name`), `AUTOSIZE` y mínimo 50px. `result_tree.set_rules_hint(true)` para filas alternadas.
+- `status_label` (`Gtk::Label` con `use_markup: true`, `halign: :start`) se muestra arriba del `ScrolledWindow` con el resultado de la búsqueda (número de filas, mensaje de "no encontrado" o error).
+- `result_box` ahora contiene: `status_label` → `scroll(ScrolledWindow(TreeView))` → `buttons_box`. Orden de packing invertido respecto al bloque de botones para que el TreeView ocupe el espacio disponible.
+- La ventana se amplió a `820×560` para acomodar las columnas.
+- **Buscar handler**: ahora llama a `search_data(valor, store, status_label, index, columns, database)` (firma nueva) en vez de `search_data(valor, result_label, ...)`. El error se muestra inline en `status_label` (sin `show_message_dialog`).
+- **Guardar handler**: comprueba `store.iter_n_children(nil) == 0` antes de llamar a `guardar_resultados(store, window)` (firma nueva).
+
+**Reescritura de `search_logic.rb`**
+- `search_data` ahora recibe `(valor, store, status_label, index, columns, db)` en lugar de `(valor, label, ...)`. Limpia el store con `store.clear`, inserta filas vía `iter = store.append; row.each_with_index { |v, i| iter[i] = v.to_s }`, y actualiza `status_label.markup` con el conteo y nombre legible. Se eliminaron las llamadas a `GLib::Idle.add` (fragiles desde callbacks de Timeout).
+- `construct_result` y `map_column_name` se mantienen sin cambios (reutilizados por `save_button_principal.rb`).
+
+**Adaptación de `save_button_principal.rb`**
+- `guardar_resultados` ahora recibe `(store, window)` en vez de `(result_label, window)`. Lee el ListStore: `store.each { |iter| rows << (0...store.n_columns).map { |c| iter[c] } }`, construye el texto con `construct_result(rows, cols)` y sigue el mismo flujo de guardado (FileChooserDialog con filtros .txt/.json/.docx/.csv).
+
+**Renombrado del botón de exportación → Import/Export**
+- `criteria_menu.rb`: botón renombrado a "Importar/Exportar base de datos" con tooltip "Importa (CSV/DB) o exporta (Excel) datos de la base de datos".
+
+**Ventana de Import/Export completa (`exportar_base_a_excel.rb`)**
+- Ventana renombrada a "Importar/Exportar base de datos" (tamaño 540×460, `border_width: 12`).
+- **Sección Importar** (Gtk::Frame): combo "CSV" / "Archivo de base de datos (.db)", `FileChooserButton` con filtros para .csv y .db, `status_label` para mensajes, botón "Importar a la base de datos". Al hacer clic, detecta tipo y llama a `ExportToExcel.import_csv` o `ExportToExcel.import_db`.
+- `import_csv`: lee CSV con `CSV.read`, detecta y omite fila de encabezado si la primera columna parece nombre de columna (`ID`/`MODELO`/`SERIE`), extrae filas de 14 columnas (sin ID) y llama a la función global `insertar_datos`.
+- `import_db`: lee la tabla de otro archivo `.db` con `obtain_data_base_data`, omite la columna ID y llama a `insertar_datos`.
+- **Sección Exportar** (Gtk::Frame): sección export existente reorganizada en su propio Frame con botones "Convertir a Excel" y "Guardar archivo Excel" alineados horizontalmente, con `status_label` para mensajes.
+- **Drag-and-drop**: la ventana es destino de `text/uri-list` (`Gtk::DragAction::COPY`). Al recibir un archivo, detecta extensión (`.csv` o `.db`), setea el combo de tipo y el file chooser automáticamente, e importa directamente.
+- Botón "Cerrar" al fondo.
+
+Verificación: `ruby -c` en todos los archivos modificados (sin warnings nuevos). Tests headless: (1) `search_data` con valor "YB3L" → store con 2 filas, status_label correcto; (2) `import_csv` con archivo CSV de prueba → 2 filas insertadas, columnas correctas (ID omitido, 14 cols); (3) `import_db` con archivo DB temporal → 2 filas, ID omitido; (4) `construct_result` sobre filas extraídas del ListStore → texto formateado correctamente. App real: ventana principal 870×560 aparece tras loading (13.5s), sin excepciones en stderr; xdotool typing + Return ejecuta búsqueda sin crash.
+
+## Novena pasada — Checklist de columnas + mejoras en menús de configuración
+
+**Checklist de columnas visibles (Gtk::Popover)**
+- `interface_setup.rb`: nuevo botón "Columnas" con icono `view-columns-symbolic` en el `search_grid` (posición 6, tras `battery_button`). Al cliclear, abre un `Gtk::Popover` con `Gtk::Box(:vertical)` que contiene:
+  - Título "Columnas a mostrar" (con markup bold).
+  - CheckButton "Seleccionar todo" (activo por defecto).
+  - `Gtk::ScrolledWindow` (240×220px) con 15 `Gtk::CheckButton` (uno por columna, con nombre legible vía `map_column_name`).
+  - Cada check conecta a `tree_columns[i].visible`. Guardia: si el usuario desmarca el único activo, se revierte (siempre ≥1 columna visible).
+  - "Seleccionar todo" usa flag `bulk_toggle` para evitar recursión; al desmarcar todo, se ocultan todas las columnas y se revierte solo la primera (ID) para respetar la regla ≥1.
+- `Gtk::TreeViewColumn` ahora usa `set_resizable(true)` y `set_min_width(60)` (antes era 50px) para mejor legibilidad.
+
+**Ancho de la ventana corregido**
+- `set_size_request(820, 560)` → `set_size_request(1200, 560)` para acomodar las 15 columnas sin corte.
+
+**Reestructuración del menú engranaje (`criteria_menu.rb`)**
+- Menú dividido en **3 secciones** con `Gtk::Separator.new(:horizontal)` y labels bold:
+  - **General**: Manual de uso (icon `help-about`) · Acerca de (icon `help-about`).
+  - **Herramientas**: Rango de Fecha (`view-calendar-symbolic`) · Calendario (`x-office-calendar-symbolic`) · Importar/Exportar (`document-send-symbolic`).
+  - **Copia de seguridad**: Configuración de Copia Seg. (`preferences-system-symbolic`) · **Nuevo "Realizar copia ahora"** (`document-save`).
+- Botón "Realizar copia ahora" ejecuta `BackupAndExit.run_automatic_backup` (non-GUI, seguro desde callback) y muestra diálogo de confirmación/error.
+- Helper interno `build_item` con lambda para reducir repetición de `Gtk::Button.new` + icon + tooltip + signal_connect.
+- Helper `add_section` con lambda que crea label bold + separator.
+- Se añadieron `require_relative` para `backup_exit`, `dialog_helper`.
+
+**Mejora de la ventana de configuración de copias (`configuracion_cop_seg.rb`)**
+- **Checkbox "Activar copia automática al iniciar la aplicación"**: `Gtk::CheckButton.new(texto)` — el setting `@activar_al_inicio` ya existía en YAML pero no tenía UI. Ahora el toggle persiste con `save_configuration` y **aplica en vivo** al hilo corriendo: activar llama `start_backup_logic` (con guard `return if @backup_thread.alive?`), desactivar llama `stop_backup_logic` (setting `@stop_backup = true` + `join(1)`).
+- **Botón "Realizar copia ahora"**: ejecuta `BackupAndExit.run_automatic_backup`, muestra diálogo, actualiza label de último respaldo.
+- **Label "Última copia automática:"** mostrado debajo del checkbox, con timestamp leído de `Logica.obtener_ultimo_respaldo_automatico` (persistido en `Ultima_copia_de_seguridad_automatica.yaml`).
+- **Layout mejorado**: `Gtk::Frame` con contenido en `Gtk::Grid` (column_spacing=8, row_spacing=8, border 12px). Ventana 460×340 (antes 400×200). Botones "Realizar copia ahora" y "Cerrar" en `Gtk::Box(:horizontal)`.
+- Eliminada la función `add_automatic_backup_section` (código muerto tras el reemplazo del layout).
+
+**Dependencia entre menú y running instance**
+- `criteria_menu.rb` reutiliza la instancia global `@_config_copia_seguridad` (establecida en `create_interface`) al abrir Configuración de Copia Seg.: `configuracion = @_config_copia_seguridad || ConfiguracionCopiaSeguridad.new`. Esto garantiza que los cambios de checkbox/combo se aplican al hilo de copia en ejecución.
+
+Verificación: `ruby -c` en `interface_setup.rb`, `criteria_menu.rb`, `configuracion_cop_seg.rb`, `main.rbw` — todos OK. Tests headless: (1) TreeView con 15 columnas, toggle hide/show funciona (14 visibles tras ocultar col1, store sigue en 15 cols); (2) `Gtk::CheckButton.new(texto)` formato positional validado (keyword `label:` falla en gobject-introspection de ruby 3.2); (3) ventana Configuración se crea (clase, título, mapeo OK); (4) `BackupAndExit.run_automatic_backup` retorna `true`; (5) búsqueda YB3L → 2 filas, `construct_result` desde store → texto con 684 chars. App real: ventana principal 1200×560, sin errores en stderr, EXIT=124 (timeout esperado).
 
 ## Pendiente/mejoras futuras (no bloqueantes)
 
