@@ -1,3 +1,4 @@
+require 'time'
 require 'yaml'
 module Logica
   @@contador_registros = 0
@@ -7,7 +8,6 @@ module Logica
   @@ultimo_respaldo_automatico = nil
   @@contador_historial = 0
   @@contador_copias_seguridad_manuales = 0
-  @registros_editados = {}
   @@contador_rango_fechas = 0
   def self.incrementar_contador_registros
     @@contador_registros += 1
@@ -70,92 +70,47 @@ module UltimaOperacion
   end
   private
   def self.guardar_en_yaml
-    begin
-      ruta_archivo = File.join(File.dirname(__FILE__), 'Ultima_operacion.yaml')
-      data = { ultima_operacion: @@ultima_operacion_realizada }
-      File.open(ruta_archivo, 'w:utf-8') do |file|
-        file.write(data.to_yaml)
-      end
-    rescue StandardError => e
-     # puts "ERROR: No se pudo guardar en YAML. Mensaje de error: #{e.message}"
-      puts "ERROR: Backtrace: #{e.backtrace.join("\n")}"
+    ruta_archivo = File.join(__dir__, 'Ultima_operacion.yaml')
+    File.open(ruta_archivo, 'w:utf-8') do |file|
+      file.write({ ultima_operacion: @@ultima_operacion_realizada }.to_yaml)
     end
+  rescue StandardError => e
+    puts "ERROR: No se pudo guardar en YAML. #{e.message}"
   end
   def self.leer_desde_yaml
-    begin
-      ruta_archivo = File.join(File.dirname(__FILE__), 'Ultima_operacion.yaml')
-      if File.exist?(ruta_archivo)
-        data = YAML.load_file(ruta_archivo)
-        @@ultima_operacion_realizada = data[:ultima_operacion]
-      end
-    rescue StandardError => e
-     # puts "ERROR: No se pudo leer desde YAML. Mensaje de error: #{e.message}"
-      puts "ERROR: Backtrace: #{e.backtrace.join("\n")}"
+    ruta_archivo = File.join(__dir__, 'Ultima_operacion.yaml')
+    if File.exist?(ruta_archivo)
+      data = YAML.load_file(ruta_archivo)
+      @@ultima_operacion_realizada = data[:ultima_operacion]
     end
+  rescue StandardError => e
+    puts "ERROR: No se pudo leer desde YAML. #{e.message}"
   end
 end
 NOMBRES_CAMPOS = {
-  ID: 'Identificador',
+  ID: 'ID de la Bateria',
   MODELO: 'Modelo',
-  SERIE: 'Número de Serie',
-  RECEPCION: 'Fecha de Recepción',
-  FACTURA: 'Número de Factura',
-  FECHA_FACTURA: 'Fecha de Factura',
-  NC: 'Número de Nota de Crédito',
-  FECHA_NC: 'Fecha de Nota de Crédito',
-  MOTIVO: 'Motivo',
+  SERIE: 'Serie',
+  RECEPCION: 'Recepción',
+  FACTURA: 'Factura',
+  FECHA_C: 'Fecha Factura',
+  NC: 'Nota de Credito',
+  FECHA_NC: 'Fecha N.C',
+  MOTIVO: 'Motivo de la devolución',
   CLIENTE: 'Cliente',
   VENDEDOR: 'Vendedor',
   RECARGA: 'Recarga',
-  FECHA_ENVIO: 'Fecha de Envío',
+  FECHA_ENVIO: 'Fecha Envío',
   DESTINO: 'Destino',
   COMENTARIOS: 'Comentarios'
-}
+}.freeze
 def recolectar_datos_ultima_operacion(column_entries, comment_entry)
-  ultimos_datos_recopilados = []
-  NOMBRES_CAMPOS.each do |campo, display_name|
+  lineas = NOMBRES_CAMPOS.each_with_object([]) do |(campo, display_name), acc|
     entry = column_entries[campo]
-    if entry
-      text = entry.text
-      case display_name
-      when 'ID'
-        display_name = 'ID de la Bateria'
-      when 'MODELO'
-        display_name = 'Modelo'
-      when 'SERIE'
-        display_name = 'Serie'
-      when 'RECEPCION'
-        display_name = 'Recepción'
-      when 'FACTURA'
-        display_name = 'Factura'
-      when 'FECHA_C'
-        display_name = 'Fecha Factura'
-      when 'NC'
-        display_name = 'Nota de Credito'
-      when 'FECHA_NC'
-        display_name = 'Fecha N.C'
-      when 'MOTIVO'
-        display_name = 'Motivo de la devolución'
-      when 'CLIENTE'
-        display_name = 'Cliente'
-      when 'VENDEDOR'
-        display_name = 'Vendedor'
-      when 'RECARGA'
-        display_name = 'Recarga'
-      when 'FECHA_ENVIO'
-        display_name = 'Fecha Envío'
-      when 'DESTINO'
-        display_name = 'Destino'
-      when 'COMENTARIOS'
-        display_name = 'Comentarios'
-      else
-        display_name = display_name
-      end
-      ultimos_datos_recopilados << "- #{display_name}: #{text}"
-    end
+    acc << "- #{display_name}: #{entry.text}" if entry
   end
-  ultimos_datos_recopilados << "- Comentarios: #{comment_entry.text}"
-  result_string = ultimos_datos_recopilados.join("\n")
-  puts result_string
-  UltimaOperacion.actualizar_ultima_operacion_realizada(result_string)
+  lineas << "- Comentarios: #{comment_entry.text}"
+  resultado = lineas.join("\n")
+  puts resultado
+  UltimaOperacion.actualizar_ultima_operacion_realizada(resultado)
 end

@@ -76,8 +76,8 @@ module ExportToExcel
             :title => "Guardar archivo Excel",
             :parent => nil,
             :action => Gtk::FileChooserAction::SAVE,
-            :buttons => [[Gtk::Stock::CANCEL, Gtk::ResponseType::CANCEL],
-                         [Gtk::Stock::SAVE, Gtk::ResponseType::ACCEPT]]
+            :buttons => [["Cancelar", Gtk::ResponseType::CANCEL],
+                         ["Guardar", Gtk::ResponseType::ACCEPT]]
           )
           dialog.current_name = "Datos_convertidos_Base_de_datos.xlsx"
           if dialog.run == Gtk::ResponseType::ACCEPT
@@ -85,10 +85,15 @@ module ExportToExcel
             dialog.destroy
 
             if save_path
-              FileUtils.mv('datos.xlsx', save_path) if File.exist?('datos.xlsx')
-              MessageHelper.show_message_window("Archivo Excel guardado exitosamente en #{save_path}.")
-              FileUtils.mkdir_p("#{Dir.pwd}/archivos_guardados/archivos_excel") unless File.directory?("#{Dir.pwd}/archivos_guardados/archivos_excel")
-              FileUtils.cp(save_path, "#{Dir.pwd}/archivos_guardados/archivos_excel/") if File.exist?(save_path)
+              exportos = File.exist?('datos.xlsx')
+              if exportos
+                FileUtils.mv('datos.xlsx', save_path)
+                MessageHelper.show_message_window("Archivo Excel guardado exitosamente en #{save_path}.")
+                FileUtils.mkdir_p("#{Dir.pwd}/archivos_guardados/archivos_excel") unless File.directory?("#{Dir.pwd}/archivos_guardados/archivos_excel")
+                FileUtils.cp(save_path, "#{Dir.pwd}/archivos_guardados/archivos_excel/") if File.exist?(save_path)
+              else
+                MessageHelper.show_message_window("Primero convierta la base de datos a Excel con el botón 'Convertir a Excel'.")
+              end
             else
               MessageHelper.show_message_window("Error al guardar el archivo Excel.")
             end

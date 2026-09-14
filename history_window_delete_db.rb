@@ -32,10 +32,10 @@ def eliminar_seleccion_bd_historial(tree_view, list_store)
       #  puts "Error al eliminar la selección de la base de datos: #{e.message}"
       end
     else
-      MessageHelper.show_message_window ("Eliminación cancelada.")
+      MessageHelper.show_message_window("Eliminación cancelada.")
     end
     dialog.destroy
   else
-    Mesaa
+    MessageHelper.show_message_window("Por favor, seleccione una fila para eliminar.")
   end
 end

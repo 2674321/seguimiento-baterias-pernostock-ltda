@@ -24,6 +24,11 @@ Ultima_operacion.yaml
 Ultima_copia_de_seguridad_automatica.yaml
 counter.yaml
 
+# Configuración y artefactos de runtime generados por la app
+configuracion.yaml
+archivo.yaml
+datos.xlsx
+
 # Pruebas / temporales
 tmp/
 

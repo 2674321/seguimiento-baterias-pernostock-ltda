@@ -1,6 +1,7 @@
 require_relative 'statistics_logic'
 require_relative 'constants'
 require 'sqlite3'
+require 'time'
 require 'fileutils'
 require 'yaml'
 module BackupAndExit
@@ -42,7 +43,11 @@ module BackupAndExit
     File.open(COUNTER_FILE, 'w') { |file| file.write(counter.to_s) }
   end
   def self.load_counter_from_file
-    stored_counter = File.read(COUNTER_FILE) if File.exist?(COUNTER_FILE)
+    return "0" unless File.exist?(COUNTER_FILE)
+    stored_counter = File.read(COUNTER_FILE).strip
+    return "0" if stored_counter.empty?
+    Time.parse(stored_counter)
+  rescue ArgumentError
     stored_counter || "0"
   end
   # Operación de backup de cierre (antes abría una ventana GTK + `Gtk.main`

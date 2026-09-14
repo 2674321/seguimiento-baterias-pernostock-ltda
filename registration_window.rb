@@ -30,24 +30,20 @@ def create_registration_window(parent)
       next if key == :ID
       break if column_entries.length >= max_inputs
       column_box = Gtk::Box.new(:vertical, 5)
-      label_text = label_text(value)
-      required_fields = ["MODELO", "SERIE", "RECEPCION", "CLIENTE", "VENDEDOR"]
-      label = Gtk::Label.new(label_text + ":")
+      label = Gtk::Label.new(label_text(value) + ":")
       label.margin_bottom = 5
       entry = Gtk::Entry.new
       entry.width_chars = 40
       entry.height_request = 23
       entry.name = key.to_s
-      placeholder_text = placeholder_text(value)
-      entry.set_placeholder_text(placeholder_text)
+      entry.set_placeholder_text(placeholder_text(value))
       column_box.pack_start(label, expand: false, fill: true, padding: 5)
       column_box.pack_start(entry, expand: true, fill: true, padding: 5)
       row_box.pack_start(column_box, expand: true, fill: true, padding: 5)
       column_entries[key] = entry
     end
     column_entries.each do |key, entry|
-      tooltip_text = tooltip_text(key)
-      entry.set_tooltip_text(tooltip_text)
+      entry.set_tooltip_text(tooltip_text(key))
     end
     registration_box.pack_start(row_box, expand: true, fill: true, padding: 5)
   end
@@ -75,12 +71,6 @@ def create_registration_window(parent)
   clear_button.signal_connect('clicked') do
     clear_fields(column_entries, comment_entry)
   end
-  def clear_fields(column_entries, comment_entry)
-    column_entries.values.each do |entry|
-    entry.text = ''
-  end
-  comment_entry.text = ''
-end
   statistics_button = Gtk::Button.new(label: 'Estadísticas')
   statistics_button.set_size_request(50, 40)
   statistics_button.set_hexpand(true)
@@ -98,17 +88,10 @@ end
   button_box.pack_start(clear_button, expand: false, fill: false, padding: 5)
   button_box.pack_start(save_button, expand: false, fill: false, padding: 5)
   registration_box.pack_start(button_box, expand: true, fill: true, padding: 5)
-  required_fields = ["MODELO", "SERIE", "RECEPCION", "CLIENTE", "VENDEDOR"]
   time_label = Gtk::Label.new
   time_label.halign = :end
   time_label.valign = :start
   time_label.margin_right = 10
-def update_time_label(label)
-  return unless label && !label.destroyed?
-  current_time = Time.now
-  formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
-  label.text = "#{formatted_time}"
-end
   update_time_label(time_label)
   GLib::Timeout.add_seconds(1) { update_time_label(time_label); true }
   time_box = Gtk::Box.new(:horizontal, 10)
@@ -163,17 +146,8 @@ def on_save_button_clicked(column_entries, comment_entry)
       elsif !column_entries[:FACTURA].text.empty? && !valid_factura?(column_entries[:FACTURA].text)
         show_message("Por favor ingresa una factura  válida (solo letras, números, comas, guiones y barras inclinadas).")
       else
-        datos_a_insertar = {}
-        column_entries.each { |key, entry| validate_length(entry.text); datos_a_insertar[key] = entry.text }
-        validate_length(comment_entry.text)
-        datos_a_insertar[:COMENTARIOS] = comment_entry.text
-        datos_a_insertar.each do |key, value|
-          column_name = Constants::TablaDeDatos::COLUMN_NAMES[key]
-         # puts "#{column_name.ljust(20)}: #{value}"
-        end
         recolectar_datos_ultima_operacion(column_entries, comment_entry)
         cleaned_data = limpiar_datos(column_entries, comment_entry)
-        datos_a_insertar = redefine_datos_originales(column_entries, comment_entry)
         registrar_datos_ventana_registro(cleaned_data)
         column_entries.each_value { |entry| entry.set_text('') }
         comment_entry.set_text('')
@@ -184,13 +158,14 @@ def on_save_button_clicked(column_entries, comment_entry)
     show_message("Por favor completa todos los campos obligatorios.")
   end
 end
+def clear_fields(column_entries, comment_entry)
+  column_entries.values.each { |entry| entry.text = '' }
+  comment_entry.text = ''
+end
+def update_time_label(label)
+  return unless label && !label.destroyed?
+  label.text = Time.now.strftime("%Y-%m-%d %H:%M:%S")
+end
 def registrar_datos_ventana_registro(datos_a_insertar)
-  fecha_actual = Time.now.strftime("%Y/%m/%d %H:%M:%S")
-  [:RECEPCION, :FECHA_C, :FECHA_NC, :FECHA_ENVIO].each do |campo_fecha|
-  end
-  datos_a_insertar.each do |key, value|
-    column_name = Constants::TablaDeDatos::COLUMN_NAMES[key]
-   # puts "#{column_name.ljust(20)}: #{value}"
-  end
   DatabaseOperations.insertar_datos(datos_a_insertar)
 end

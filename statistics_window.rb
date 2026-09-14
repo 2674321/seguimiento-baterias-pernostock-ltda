@@ -35,7 +35,7 @@ module Interfaz
     results = db.execute(query)
     results.each do |row|
       iter = lista_estadisticas_2.append
-      iter.set_value(0, row[0].downcase)
+      iter.set_value(0, row[0].to_s.downcase)
       iter.set_value(1, row[1].to_s)
     end
     db.close
