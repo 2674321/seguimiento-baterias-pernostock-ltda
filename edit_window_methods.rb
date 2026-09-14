@@ -28,3 +28,25 @@ def perform_search(edit_grid, id)
     MessageHelper.show_message_window(search_message) unless search_message.nil?
   end
 end
+def retrieve_for_save(edit_grid, id)
+  @original_field_values = {}
+  @search_operation = true
+  message = nil
+  begin
+    validar_id(id)
+    battery_data = retrieve_battery_data(id)
+    if battery_data.nil?
+      message = "Batería no encontrada"
+    else
+      update_edit_grid_fields(edit_grid, battery_data)
+    end
+  rescue ArgumentError => e
+    puts "Error en la búsqueda: #{e.message}"
+    message = "Error en la búsqueda: #{e.message}"
+  rescue SQLite3::Exception => error
+    message = "Error en la búsqueda: #{error.message}"
+  ensure
+    @search_operation = false
+  end
+  message
+end

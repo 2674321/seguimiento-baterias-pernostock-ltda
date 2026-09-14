@@ -8,27 +8,20 @@ module SearchLogic
   def handle_search_button(start_date, end_date, selected_column)
     db = obtain_database_connection
     results = {}
-    if selected_column == "Todas"
-      all_columns = ["RECEPCION", "FECHA_C", "FECHA_NC", "FECHA_ENVIO"]
-      all_columns.each do |column|
-        query = "SELECT ID, #{column} FROM tabla_de_datos WHERE #{column} BETWEEN ? AND ?"
-        begin
-          rows = db.execute(query, start_date, end_date)
-          results[column] = rows unless rows.empty?
-        rescue SQLite3::Exception => e
-          handle_search_error(e)
-        end
-      end
-    else
-      query = "SELECT ID, #{selected_column} FROM tabla_de_datos WHERE #{selected_column} BETWEEN ? AND ?"
+    all_columns = ["RECEPCION", "FECHA_C", "FECHA_NC", "FECHA_ENVIO"]
+    columns = selected_column == "Todas" ? all_columns : [selected_column]
+    columns.each do |column|
+      query = "SELECT ID, #{column} FROM tabla_de_datos WHERE #{column} BETWEEN ? AND ?"
       begin
-        rows = db.execute(query, start_date, end_date)
-        results[selected_column] = rows unless rows.empty?
+        rows = db.execute(query, [start_date, end_date])
+        results[column] = rows unless rows.empty?
       rescue SQLite3::Exception => e
         handle_search_error(e)
       end
     end
     results
+  ensure
+    db.close if db
   end
 
   def obtain_database_connection

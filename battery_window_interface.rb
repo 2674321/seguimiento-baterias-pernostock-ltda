@@ -44,10 +44,6 @@ def create_battery_window
     column = Gtk::TreeViewColumn.new(col_title, renderer, text: col)
     column.set_sizing(Gtk::TreeViewColumnSizing::AUTOSIZE)
     tree_view.append_column(column)
-    column.signal_connect('clicked') do |_widget|
-    end
-  end
-  tree_view.signal_connect('row-activated') do |_widget, path, _column|
   end
   tree_view.signal_connect('button-press-event') do |_widget, event|
     if event.button == Gdk::BUTTON_SECONDARY

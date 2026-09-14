@@ -1,5 +1,5 @@
+require_relative 'constants'
 module GuardarEnTablaDelHistorial
-  NOMBRE_DB = 'base_de_datos.db'
   def self.guardar_en_tabla_de_registro(id_bateria, campo_modificado, valor_anterior, valor_nuevo, comment)
     fecha_hora = Time.now.strftime("%Y-%m-%d %H:%M:%S")
     db = SQLite3::Database.open(NOMBRE_DB)

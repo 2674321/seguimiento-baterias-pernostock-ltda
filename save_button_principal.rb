@@ -1,5 +1,6 @@
 require 'gtk3'
 require 'fileutils'
+require_relative 'utilities'
 def guardar_resultados(result_label, window)
   results_text = result_label.text
   dialog = Gtk::FileChooserDialog.new(

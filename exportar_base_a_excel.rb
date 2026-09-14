@@ -19,15 +19,15 @@ module ExportToExcel
   def self.obtain_data_base_data(file_path)
     begin
       db = SQLite3::Database.new file_path
-      db_name = "base_de_datos"
       table_name = "tabla_de_datos"
       query = "SELECT * FROM #{table_name};"
       results = db.execute(query)
-      db.close
       return results
     rescue SQLite3::Exception => e
       puts "Error al obtener datos de la base de datos: #{e}"
       return nil
+    ensure
+      db.close if db
     end
   end
   class ExportToExcelWindow

@@ -11,7 +11,6 @@ def show_loading_window(duration)
   spinner.start
   message_label = Gtk::Label.new
   vbox.pack_start(message_label, expand: false, fill: true, padding: 10)
-  message_index = 0
   GLib::Timeout.add(2000) do
     unless loading_window.destroyed?
       message_label.text = MESSAGES.sample

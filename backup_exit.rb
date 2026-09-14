@@ -21,7 +21,7 @@ module BackupAndExit
       Logica.actualizar_ultimo_respaldo_automatico(Time.now)
       save_counter_to_file(Logica.obtener_ultimo_respaldo_automatico)
     rescue StandardError => e
-      show_error_dialog("Error al crear la copia de seguridad: #{e.message}")
+      warn "[backup] No se pudo crear la copia de seguridad: #{e.message}"
     ensure
       db.close if db
     end

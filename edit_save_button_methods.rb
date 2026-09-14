@@ -1,13 +1,13 @@
 require_relative 'edit_validation'
 def save_button_logic(comment, edit_grid, id)
   begin
-    changed_fields = []
     invalid_fields = []
     invalid_fields << 'Motivo de la Edición' if comment.strip.empty?
-    search_result = perform_search(edit_grid, id)
-    if search_result.to_s.start_with?("Error", "Batería no encontrada")
-      show_message_window(search_result)
+    search_message = retrieve_for_save(edit_grid, id)
+    if search_message
+      show_message_window(search_message)
     else
+      changed_fields = []
       collect_changed_fields(edit_grid, changed_fields)
       if invalid_fields.empty?
         process_changed_fields(changed_fields, id, edit_grid, comment)

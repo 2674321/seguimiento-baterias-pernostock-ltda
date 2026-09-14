@@ -1,3 +1,4 @@
+require_relative 'statistics_logic'
 module StatisticsData
   def self.update_statistics_list(lista_estadisticas)
     total_registros = Logica.obtener_total_registros.to_s
