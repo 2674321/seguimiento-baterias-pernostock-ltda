@@ -4,10 +4,6 @@ def valid_motivo?(value)
   allowed_states.any? { |state| normalized_value.include?(state) } &&
     normalized_value.split.all? { |part| !part.empty? && part.match?(/\A[a-zA-Z]+\z/) }
 end
-def valid_espacios_en_blanco?(input)
-  return false if input.count(' ') > 3
-  true
-end
 def valid_cliente?(value)
   parts = value.split
   parts.length >= 1 && parts.all? { |part| !part.empty? && part.match?(/\A[^0-9!@#$%^&*()_+={}\[\]|\\:;"'<>,.?\/]+\z/) }
@@ -37,9 +33,6 @@ def valid_sensible_combined_date?(value)
   max_days = Date.new(year, month, -1).day
   return false unless (1..max_days).include?(day)
   true
-end
-def validate_length(value, max_length = MAX_LONGITUD_GENERAL)
-  raise ValidationError, "String length exceeds the maximum allowed (#{max_length} characters)" unless value.is_a?(String) && value.length <= max_length
 end
 def validate_nota_de_credito?(input)
   Float(input) && Integer(input)

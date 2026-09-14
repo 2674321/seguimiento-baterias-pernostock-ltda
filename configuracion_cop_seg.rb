@@ -1,6 +1,7 @@
 require 'gtk3'
 require 'yaml'
 require 'fileutils'
+require_relative 'constants'
 class ConfiguracionCopiaSeguridad
   CONFIG_FILE = 'configuracion.yaml'
   DEFAULT_INTERVALO = 30
@@ -57,14 +58,14 @@ class ConfiguracionCopiaSeguridad
     window
   end
   def realizar_copia_de_seguridad
-    unless File.exist?('base_de_datos.db')
-      puts "No se ha encontrado 'base_de_datos.db'; se omite la copia temporizada."
+    unless File.exist?(NOMBRE_DB)
+      puts "No se ha encontrado #{NOMBRE_DB}; se omite la copia temporizada."
       return
     end
     backup_directory = File.join(Dir.pwd, 'Copias_de_seguridad', 'Copias_de_seguridad_temporizadas')
     FileUtils.mkdir_p(backup_directory) unless File.directory?(backup_directory)
     backup_file = File.join(backup_directory, "Copia_temporizada_#{Time.now.strftime('%Y-%m-%d_%H-%M-%S')}.db")
-    FileUtils.cp('base_de_datos.db', backup_file)
+    FileUtils.cp(NOMBRE_DB, backup_file)
   rescue StandardError => e
     puts "Error al crear copia temporizada: #{e.message}"
   end

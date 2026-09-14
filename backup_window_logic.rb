@@ -13,6 +13,18 @@ def show_error_dialog(message)
   dialog.run
   dialog.destroy
 end
+def show_info_dialog(message)
+  dialog = Gtk::MessageDialog.new(
+    transient_for: nil,
+    flags: Gtk::DialogFlags::MODAL,
+    type: Gtk::MessageType::INFO,
+    buttons: Gtk::ButtonsType::CLOSE,
+    message: message
+  )
+  dialog.set_position(Gtk::WindowPosition::CENTER)
+  dialog.run
+  dialog.destroy
+end
 def show_confirmation_dialog(window)
   dialog = Gtk::MessageDialog.new(
     transient_for: window,

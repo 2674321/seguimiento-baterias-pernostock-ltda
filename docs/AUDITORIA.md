@@ -162,6 +162,21 @@ edición completo (recuperar → reemplazar → historial → contadores → úl
 
 Verificación: `ruby -c` en los 60 archivos; `ruby -w` de `main.rbw` sin warnings; render X11 de principal/edición/baterías/historial/estadísticas/registro/manual/fecha; búsqueda por rango real contra DB; `retrieve_for_save` probado para ID válido/inválido/inexistente.
 
+## Cuarta pasada (commit pendiente)
+
+Hallazgos por auditoría empírica (`ruby -w`, grep, arity verificada contra sqlite3 2.9.6):
+
+- **GTK en thread no-principal** (`backup_window.rb`): en el `rescue` del thread worker de la copia manual se mostraba `show_error_dialog` (diálogo GTK + `dialog.run`) → ahora vía `GLib::Idle.add` (seguro para GTK). También se añadió `show_info_dialog` (información) y el éxito de "Base de datos reemplazada" dejó de usar el diálogo de ERROR.
+- **`validacion_inputs_edit.rb`**: la lista de columnas de fecha era `%w[RECEPCION FECHA_C FECHA_NC FECHA]` — la columna real es `FECHA_ENVIO`, así que "Fecha Envío" no se validaba en edición. Corregido. Rango de año unificado a `1950..2050` (antes 1800..2050 en edit/search vs 1950..2050 en registro).
+- **Redefiniciones reales** (verificadas con `-w`): `update_time_label` (registro + baterías) → la de baterías pasa a `update_battery_time_label`; `invertir_orden` (baterías + historial) → ahora única en `history_window_invert_order.rb`, `battery_window_add_fav.rb` la requiere.
+- **`@original_field_values` tipado como Array** (`collect_original_data` lo pisaba con `retrieve_battery_data`) → método y llamada eliminados (código muerto + tipo peligroso).
+- **Registro "todos los campos iguales" nunca se disparaba** (`registration_window.rb`): `column_entries.values.uniq.length` comparaba objetos `Gtk::Entry` (siempre N) y `entry.empty?` no existe; ahora compara `.map(&:text)`.
+- **Código muerto eliminado**: `edit_window.rb` (`iniciar_ventana_de_edicion`, `@edited_inputs`, `@message_window`), `database_operations.rb` (`insertar_datos` global sin llamadores), `registration_window_validators.rb` (`valid_espacios_en_blanco?`, `validate_length`), `date_search_validators.rb` (`validate_length`), `edit_validation.rb` (`flexible_validator`, `clear_search_fields`), `reemplazo_de_datos.rb` (`total_ediciones`), `interface_setup.rb` (`resultados_guardados`, `column_text`), `process_changed_fields` (llamada a `collect_edited_fields` sin uso).
+- **DB name**: `search_logic.rb` y `configuracion_cop_seg.rb` usaban `'base_de_datos.db'` hardcodeado → `NOMBRE_DB`.
+- `collect_edited_fields` devuelve `{}` bajo excepción (antes nil → `validate_edited_fields(nil)` crash latente).
+
+Verificación: `ruby -c` en los 60 archivos; `ruby -w` de `main.rbw` **sin ningún warning** (antes había method-redefined); render X11 de todas las ventanas; app real lanzada con el script (Gtk.main corriendo, sin errores); flujo de edición/reemplazo contra DB real.
+
 ## Pendiente/mejoras futuras (no bloqueantes)
 
 - Revisar mensajería de `backup_window_logic.rb` (`show_error_dialog`/

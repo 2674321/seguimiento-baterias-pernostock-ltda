@@ -25,7 +25,7 @@ module SearchLogic
   end
 
   def obtain_database_connection
-    SQLite3::Database.new('base_de_datos.db')
+    SQLite3::Database.new(NOMBRE_DB)
   end
 end
 def map_column_name(value)

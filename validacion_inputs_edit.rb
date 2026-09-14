@@ -25,7 +25,7 @@ module ValidationModule
                normalized_value.split.all? { |part| !part.empty? && part.match?(/\A[a-zA-Z]+\z/) }
           error_messages << "MOTIVO: Debe ser uno de los siguientes estados: Funcional (Devuelta pero sigue funcional), Defectuoso, Problema de fábrica, Daño en envío, Incompatible,Cambio de modelo, error en el pedido. Valor ingresado: #{value}"
         end
-      elsif %w[RECEPCION FECHA_C FECHA_NC FECHA].include?(column)
+      elsif %w[RECEPCION FECHA_C FECHA_NC FECHA_ENVIO].include?(column)
         date_regex = /\A\d{4}\/\d{2}\/\d{2}\z/
         unless value.match?(date_regex)
           error_messages << "#{column}: Debe tener el formato AAAA/MM/DD. Valor ingresado: #{value}"
@@ -38,7 +38,7 @@ module ValidationModule
               error_messages << "#{column}: La fecha debe contener año, mes y día. Valor ingresado: #{value}"
             else
               year, month, day = date_parts.map(&:to_i)
-              unless (1800..2050).include?(year) && (1..12).include?(month)
+              unless (1950..2050).include?(year) && (1..12).include?(month)
                 error_messages << "#{column}: Año o mes fuera de rango, Por favor ingrese una fecha valida. Valor ingresado: #{value}"
               else
                 max_days = Date.new(year, month, -1).day
@@ -105,7 +105,8 @@ module ValidationModule
       end
       @edited_fields
     rescue StandardError => error
-    # puts "Error al recoger campos editados: #{error.message}"
+      puts "Error al recoger campos editados: #{error.message}"
+      @edited_fields = {}
     end
   end
 end
