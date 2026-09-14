@@ -107,6 +107,40 @@ Llamadas a `Gtk.main` dentro de callbacks congelaban la interfaz. Eliminadas de:
   de baja del tracking (`git rm --cached`) y se añadieron a `.gitignore`, junto con
   `datos.xlsx`.
 
+## Segunda pasada de limpieza (commit `2b220bf`)
+
+- `battery_window_logic.rb`: `data[6].to_i` → `data[6].to_s` (la columna NC se
+  mostraba como `0`), eliminado bucle vacío, `ensure db.close`. Se revirtió una
+  consolidación de `agregar_a_favoritos`/`invertir_orden`/`eliminar_seleccion_bd`
+  (los archivos dedicados `battery_window_add_fav.rb` y `battery_window_delete_db.rb`
+  ya se cargan y eran la fuente única).
+- `battery_window_delete_interface.rb`: eliminada `restablecer_pagina` duplicada
+  (existía también en `battery_window_reset_window.rb`).
+- `battery_window_search_logic.rb`: guarda contra `battery_data` nulo.
+- `edit_database_methods.rb`: eliminados `collect_changed_fields` duplicado (queda en
+  `edit_save_button_methods.rb`) y `required_fields_valid?` duplicado (queda en
+  `registration_window_validators.rb`); variables muertas; requires añadidos.
+- `edit_window_interface.rb`: eliminado el primer bloque `button_box`/`exit_button`
+  duplicado (quedaba pisado por el segundo).
+- `edit_window_history_data_insert_module.rb`: la conexión SQLite se abría en el
+  momento de cargar el archivo; ahora se abre/cierra por llamada.
+- `history_data.rb`: ante excepciones SQLite devuelve `[]` (antes conseguía devolver
+  una fila inválida a `update_history_view`).
+- `history_window_delete_inter.rb`: eliminado `else` vacío.
+- `reemplazo_de_datos.rb`: **bug real** — `db.execute(update_query, *values, id)`
+  rompía el arity de `sqlite3` 2.x durante el guardado de edición; ahora
+  `db.execute(update_query, values + [id])`. Se añadió `require 'message_helper'`.
+- `registration_data_cleaning.rb`: eliminado `redefine_datos_originales` (muerto).
+- `save_registration_window.rb`: **eliminado** (huérfano; sus 6 helpers eran código
+  muerto y nunca se cargaba).
+- `user_manual.rb`: faltaba `require 'gtk3'` (fallaba en carga aislada).
+- `validacion_inputs_edit.rb`: eliminada `show_alert_dialog` (muerta).
+
+Verificación adicional de esta semana: `ruby -c` en todos los archivos; renderizado
+X11 de principal/edición/baterías/historial/estadísticas/registro/manual; flujo
+edición completo (recuperar → reemplazar → historial → contadores → última operación);
+`invertir_orden`; sin *method redefined warnings* al cargar `main.rbw` con `-w`.
+
 ## Pendiente/mejoras futuras (no bloqueantes)
 
 - Revisar mensajería de `backup_window_logic.rb` (`show_error_dialog`/
