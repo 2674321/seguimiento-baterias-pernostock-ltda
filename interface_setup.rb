@@ -13,7 +13,8 @@ require_relative 'history_helper'
 require_relative 'message_helper'
 require_relative 'database_operations'
 require_relative 'search_logic'
-require_relative 'battery_window'
+require_relative 'tabla_resultados'
+require_relative 'history_window_interface'
 require_relative 'statistics_window'
 require_relative 'configuracion_cop_seg'
 require_relative 'save_button_principal'
@@ -61,10 +62,6 @@ def create_interface(columns)
   menu_button = Gtk::Button.new
   menu_button.set_size_request(30, 30)
   create_criteria_menu(menu_button, window)
-  battery_button = Gtk::Button.new
-  battery_button.set_size_request(30, 30)
-  battery_button.label = "Ventana Baterias"
-  battery_button.set_tooltip_text('Ventana con las Baterias Registradas.')
   columns_button = Gtk::Button.new
   columns_button.set_size_request(30, 30)
   set_button_icon(columns_button, 'view-columns-symbolic')
@@ -74,12 +71,8 @@ def create_interface(columns)
   search_grid.attach(Gtk::Label.new('Columna:'), 2, 0, 1, 1)
   search_grid.attach(column_combo, 3, 0, 1, 1)
   search_grid.attach(menu_button, 4, 0, 1, 1)
-  search_grid.attach(battery_button, 5, 0, 1, 1)
-  search_grid.attach(columns_button, 6, 0, 1, 1)
+  search_grid.attach(columns_button, 5, 0, 1, 1)
   main_box.pack_start(search_grid, expand: false, fill: true, padding: 4)
-  battery_button.signal_connect('clicked') do
-    BatteryWindow.initialize_interface
-  end
 
   result_box = Gtk::Box.new(:vertical, 2)
   main_box.pack_start(result_box, expand: true, fill: true, padding: 4)
@@ -104,6 +97,14 @@ def create_interface(columns)
   scroll.set_policy(:automatic, :automatic)
   scroll.add(result_tree)
   result_box.pack_start(scroll, expand: true, fill: true, padding: 4)
+
+  result_tree.signal_connect('button-press-event') do |_widget, event|
+    if event.button == Gdk::BUTTON_SECONDARY
+      construir_menu_contextual_resultados(result_tree, store, status_label).popup_at_pointer(event)
+    end
+  end
+
+  recargar_tabla_baterias(store, status_label)
 
   columns_popover = Gtk::Popover.new(columns_button)
   columns_popover.modal = false
@@ -181,6 +182,14 @@ def create_interface(columns)
   edit_button = Gtk::Button.new(label: 'Edición')
   set_button_icon(edit_button, 'accessories-text-editor')
   edit_button.set_tooltip_text('Haz clic aquí para abrir la ventana de edición de baterías.')
+  history_button = Gtk::Button.new(label: 'Historial')
+  set_button_icon(history_button, 'view-list-symbolic')
+  history_button.set_tooltip_text('Abrir la ventana de historial de ediciones.')
+  history_button.signal_connect('clicked') { create_history_window }
+  statistics_button = Gtk::Button.new(label: 'Estadísticas')
+  set_button_icon(statistics_button, 'x-office-spreadsheet')
+  statistics_button.set_tooltip_text('Abrir la ventana de estadísticas de operaciones.')
+  statistics_button.signal_connect('clicked') { Interfaz.ventana_de_estadisticas }
   exit_button = Gtk::Button.new(label: 'Salir')
   exit_button.image = Gtk::Image.new(icon_name: "application-exit", icon_size: Gtk::IconSize::BUTTON)
   exit_button.set_tooltip_text('Cierra el programa.')
@@ -218,11 +227,22 @@ def create_interface(columns)
   buttons_box.pack_start(backup_button, expand: true, fill: true, padding: 3)
   buttons_box.pack_start(edit_button, expand: true, fill: true, padding: 3)
   buttons_box.pack_start(registration_button, expand: true, fill: true, padding: 3)
+  buttons_box.pack_start(history_button, expand: true, fill: true, padding: 3)
+  buttons_box.pack_start(statistics_button, expand: true, fill: true, padding: 3)
   search_buttons.each { |btn| buttons_box.pack_start(btn, expand: true, fill: true, padding: 3) }
   exit_button.signal_connect('clicked') do
     window.destroy
   end
+  time_box = Gtk::Box.new(:horizontal, 10)
+  time_label = Gtk::Label.new('')
+  time_label.halign = :end
+  time_label.margin_right = 8
+  time_box.pack_end(time_label, expand: false, fill: false, padding: 4)
+  main_box.pack_start(time_box, expand: false, fill: false, padding: 2)
+  update_time_label(time_label)
+  clock_timeout_id = GLib::Timeout.add_seconds(1) { update_time_label(time_label); true }
   window.signal_connect('destroy') do
+    GLib::Source.remove(clock_timeout_id) if clock_timeout_id
     @_config_copia_seguridad&.stop_backup_logic
     BackupAndExit.run_automatic_backup
     Gtk.main_quit

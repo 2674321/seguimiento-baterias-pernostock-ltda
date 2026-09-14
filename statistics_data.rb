@@ -9,7 +9,6 @@ module StatisticsData
     copias_seguridad_realizadas = Logica.obtener_total_copias_seguridad_manuales.to_s
     ultima_operacion = UltimaOperacion.obtener_ultima_operacion_realizada || 'N/A'
     busquedas_ventana_historial = Logica.obtener_total_historial.to_s
-    busquedas_ventana_baterias = Logica.obtener_total_busquedas_ventana_baterias.to_s
     operaciones_rango_fechas = Logica.contador_rango_fechas.to_s
     lista_estadisticas.clear
     iter = lista_estadisticas.append
@@ -20,7 +19,6 @@ module StatisticsData
     iter[4] = ediciones_realizadas
     iter[5] = copias_seguridad_realizadas
     iter[6] = busquedas_ventana_historial
-    iter[7] = busquedas_ventana_baterias
-    iter[8] = operaciones_rango_fechas
+    iter[7] = operaciones_rango_fechas
   end
 end

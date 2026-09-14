@@ -55,12 +55,12 @@ module Interfaz
       title_box = Gtk::Box.new(:horizontal, 10)
       title_box.pack_start(title_label, expand: false, fill: false, padding: 5)
       title_box.pack_start(subtitle_label, expand: false, fill: false, padding: 5)
-      lista_estadisticas = Gtk::ListStore.new(String, String, String, String, String, String, String, String, String)
+      lista_estadisticas = Gtk::ListStore.new(String, String, String, String, String, String, String, String)
       tree_view = Gtk::TreeView.new(lista_estadisticas)
       tree_view.set_headers_visible(true)
       tree_view.set_rules_hint(true)
       tree_view.set_width_request(-1)
-      columns = ['Últ. Operación Realizada', 'Ult. Respaldo Automático', 'Reg. Totales', 'Búsq. totales', 'Edic. totales', 'Cant. Cop. Seguridad', 'Búsq. Vent. Historial', 'Búsq. Vent. Baterias', 'Op. Rang. de Fechas']
+      columns = ['Últ. Operación Realizada', 'Ult. Respaldo Automático', 'Reg. Totales', 'Búsq. totales', 'Edic. totales', 'Cant. Cop. Seguridad', 'Búsq. Vent. Historial', 'Op. Rang. de Fechas']
       columns.each_with_index do |col_title, col|
         renderer = Gtk::CellRendererText.new
         column = Gtk::TreeViewColumn.new(col_title, renderer, text: col)
