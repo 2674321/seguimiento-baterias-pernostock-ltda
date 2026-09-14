@@ -30,7 +30,7 @@ class ManualWindow
     <a href='#historial_cambios'>10. Historial de cambios</a>\n
     <a href='#estadísticas'>11. Estadísticas</a>\n
     <a href='#config_copia_seguridad'>12. Configuracion copia de segurida (menu con icono de herramientas)</a>\n
-    <a href='#exportar_base_de_datos'>13. Exportar base de datos a Excel</a>\n
+    <a href='#exportar_base_de_datos'>13. Importar/Exportar base de datos</a>\n
     <a href='#soporte_contacto'>14. Reporte de errores</a>\n\n\n\n\n\n\n\n\n\n\n\n
 
 
@@ -214,16 +214,20 @@ class ManualWindow
     Usted presionara el menu y seguidamente el boton Configuración Cop Seg.
     Una vez abierta la ventana se le presentara un menu desplegable con 6 opciones de las cuales puede elegir el tiempo a eleccion,\n
     con el cual se ejecuta la copia de seguridad temporizada.\n\n
-    - <b>Exportar base de datos a Excel:</b>\n Esta ventana permite convertir los datos actuales de la base de datos en Excel/hoja de cálculo.\n
+    - <b>Importar/Exportar base de datos:</b>\n Esta ventana permite importar datos (CSV u otra base de datos .db) a la base de datos actual, y convertir/exportar los datos a Excel/hoja de cálculo.\n
     - <b>Uso:</b>\n
     1. Presione el menú que se encuentra en la parte superior derecha de la ventana principal (icono de herramientas).\n
-    2. Una vez abierto el menú, presione el botón ¨Exportar base de datos a Excel¨.\n
+    2. Una vez abierto el menú, presione el botón ¨Importar/Exportar base de datos¨.\n
     3. Cuando se encuentre en la ventana, presione el botón con el icono de carpeta.\n
     4. Una vez presionado, se le mostrará una ventana en la cual usted elegirá la base de datos a convertir.\n
       - Para convertir la base de datos actual, usted debería retroceder a la carpeta llamada Seguimiento batería, haciendo click sobre ella en la ruta.\n
       - Para convertir una copia de seguridad, debería dirigirse a una de las 3 que contienen las copias de seguridad, en la ventana actual.\n
     5. Una vez elegido el archivo, presionará el botón ¨Convertir a Excel¨ y luego de la notificación, presionará el botón ¨Guardar archivo Excel¨.\n
-    6. Una vez presionado el botón ¨Guardar archivo Excel¨, usted elegirá el lugar donde quiere guardar el archivo y presionará ¨Guardar¨.\n\n
+    6. Una vez presionado el botón ¨Guardar archivo Excel¨, usted elegirá el lugar donde quiere guardar el archivo y presionará ¨Guardar¨.\n
+    - <b>Importar datos (CSV o .db):</b>\n
+    1. En la misma ventana, elija el tipo de archivo a importar (CSV o base de datos .db).\n
+    2. Seleccione el archivo con el botón de carpeta o arrástrelo directamente sobre la ventana (drag & drop).\n
+    3. Presione el botón ¨Importar a la base de datos¨. Los registros se insertarán en la base de datos actual.\n\n
     <b>5. Reporte de errores:</b>\n
     Para reportar problemas, contáctame en <u>patriciovarelacontreras@gmail.com</u>.\n
     Este es mi primer programa de alta complejidad, puede tener varios errores que no pude detectar. Puedes mencionarlos enviando un correo.\n\n
