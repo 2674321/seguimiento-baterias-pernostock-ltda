@@ -349,11 +349,52 @@ Verificación: `ruby -c` en todos los archivos modificados (sin warnings nuevos)
 
 Verificación: `ruby -c` en `interface_setup.rb`, `criteria_menu.rb`, `configuracion_cop_seg.rb`, `main.rbw` — todos OK. Tests headless: (1) TreeView con 15 columnas, toggle hide/show funciona (14 visibles tras ocultar col1, store sigue en 15 cols); (2) `Gtk::CheckButton.new(texto)` formato positional validado (keyword `label:` falla en gobject-introspection de ruby 3.2); (3) ventana Configuración se crea (clase, título, mapeo OK); (4) `BackupAndExit.run_automatic_backup` retorna `true`; (5) búsqueda YB3L → 2 filas, `construct_result` desde store → texto con 684 chars. App real: ventana principal 1200×560, sin errores en stderr, EXIT=124 (timeout esperado).
 
+## Décima pasada — fusión de ventanas: Ventana principal + Ventana de Baterías
+
+**Decisión de arquitectura**
+- Las dos ventanas hacían esencialmente lo mismo (grid de 15 columnas + buscador + edición). Se decidió **fusionar en una sola ventana**: la principal absorbe todo el valor del "hoja de baterías" y la ventana de baterías se elimina por completo.
+
+**Nuevo archivo `tabla_resultados.rb` (consolidación de la lógica de la tabla)**
+- `obtener_registros_tabla_datos`: `SELECT * FROM tabla_de_datos` (heredado del `obtener_datos_baterias` de la ventana de baterías; todos los valores a string).
+- `poblar_list_store(list_store, registros)`: limpia y llena el `Gtk::ListStore` desde un array de filas.
+- `recargar_tabla_baterias(list_store, status_label = nil)`: consulta, puebla, resetea `@linea_divisoria_agregada` y actualiza el `status_label` con "Mostrando X batería(s) en la base de datos." Retorna el total.
+- `agregar_a_favoritos(tree_view, list_store)`: mueve la fila seleccionada al tope con divisor "FAVORITOS (SUPERIOR)" (hereda de `battery_window_add_fav.rb`).
+- `eliminar_seleccion_interfaz(tree_view, list_store)`: elimina la fila solo de la vista.
+- `eliminar_seleccion_bd(tree_view, list_store)`: diálogo de confirmación + `DELETE` + `UltimaOperacion` (hereda de `battery_window_delete_db.rb`).
+- `construir_menu_contextual_resultados(tree_view, list_store, status_label = nil)`: construye el `Gtk::Menu` de clic derecho con 6 opciones: Editar, Agregar a Favoritos, Invertir Orden, Eliminar (Interfaz), Eliminar (Base de Datos), Ver todas las baterías. "Editar" pasa `iter[0]` (ID) a `create_edit_window(id)`.
+
+**`interface_setup.rb` (ventana única)**
+- Eliminados: `require_relative 'battery_window'`, botón "Ventana Baterias" en el `search_grid` (col 5) y su handler.
+- **Carga completa al abrir**: `recargar_tabla_baterias(store, status_label)` justo tras crear el TreeView → la ventana principal ahora muestra todas las baterías (comportamiento del hoja de baterías).
+- **Menú contextual**: `button-press-event` con `Gdk::BUTTON_SECONDARY` sobre el TreeView de resultados que abre `construir_menu_contextual_resultados` (antes estrictamente exclusivo de la ventana de baterías).
+- **Nuevos botones** en la fila inferior: "Historial" (→ `create_history_window`) y "Estadísticas" (→ `Interfaz.ventana_de_estadisticas`), con iconos `view-list-symbolic` / `x-office-spreadsheet`. Añadidos `require_relative 'tabla_resultados'` y `require_relative 'history_window_interface'`.
+- **Reloj en vivo**: `time_box` + `time_label` al pie de la ventana con `GLib::Timeout.add_seconds(1)` (heredado de la ventana de baterías); el timeout se elimina en `destroy`.
+
+**`main.rbw`**
+- Eliminado `require_relative 'battery_window'` (línea 9); ya no hace falta cargar la ventana que desaparece.
+
+**`registration_window.rb`**
+- Eliminado el botón "Ventana de Baterías" y su handler (`create_battery_window`). Ya no existe una ventana separada que abrir.
+
+**Limpieza de estadísticas (`statistics_logic.rb`, `statistics_data.rb`, `statistics_window.rb`)**
+- Se eliminó el contador `@@contador_busquedas_ventana_baterias` y sus accessors: ya no existe la búsqueda desde una ventana de baterías separada (todo el buscador vive en la única ventana).
+- La tabla de estadísticas pasa de 9 a 8 columnas: se quita "Búsq. Vent. Baterias". `StatisticsData.update_statistics_list` reindexado.
+
+**Eliminación de archivos muertos**
+- Borrados: `battery_window.rb`, `battery_window_interface.rb`, `battery_window_logic.rb`, `battery_window_search_logic.rb`, `battery_window_add_fav.rb`, `battery_window_delete_db.rb`, `battery_window_delete_interface.rb`, `battery_window_reset_window.rb`.
+- `history_window_invert_order.rb` (con `invertir_orden`) se conserva: es compartido por la tabla de resultados y el historial.
+- Verificado con grep que no quedan referencias a funciones/constantes borradas del alcance global.
+
+**`user_manual.rb`**
+- Renombradas las secciones de "Ventana de baterías" → "Tabla de baterías (Ventana principal)"; actualizada la funcionalidad (carga completa al abrir, menú contextual con 6 opciones, "Ver todas las baterías"). Ajustados textos de buscadores (2 ventanas con buscador), ventana de edición, registro y estadísticas (sin "Búsq. Vent. Baterias").
+
+Verificación: `ruby -c` OK en `interface_setup.rb`, `registration_window.rb`, `tabla_resultados.rb`, `statistics_logic.rb`, `statistics_data.rb`, `statistics_window.rb`, `user_manual.rb`, `main.rbw`. Grep sin referencias colgantes a `battery_window*` ni contadores eliminados. Smoke test headless (`test_merge_smoke.rb`): carga inicial 7 filas + status label, store 15 cols, menú contextual con 6 ítems, `eliminar_seleccion_interfaz` quita 1 fila, favoritos inserta divisor (fila 2), estadísticas 8 columnas, `create_interface` crea ventana con TreeView poblado (7 filas), botones Historial/Estadísticas presentes, sin botón baterías → RESULT=PASS. App real (X11): ventana "Ventana principal de búsqueda" 1200×560 IsViewable centrada, stderr sin errores, clic derecho abre menú contextual y búsqueda por teclado (YB3L → 2 filas: IDs 1 y 6) sin crash, app sigue viva.
+
 ## Pendiente/mejoras futuras (no bloqueantes)
 
 **Código duplicado restante (bajo riesgo, valor moderado)**
-- Acciones de menú contextual gemelas (battery vs history) — `agregar_a_favoritos`, `eliminar_seleccion_interfaz`, `eliminar_seleccion_bd`, `restablecer_pagina` — funciones prácticamente idénticas con distintos nombres. Podrían consolidarse en un módulo `TreeViewActions`, aunque el flag `@linea_divisoria_agregada` comparte estado entre ventanas.
-- 4 misiones de nombres-legibles manuales (`NOMBRES_CAMPOS`, `NOMBRES_BATTERY_WINDOW_STAT`, `label_text`/`set_entry_tooltip`, `HistoryData.format_results`, `create_edit_window`): un cambio de nombre de columna requiere actualizar todos. Podrían derivarse de `Constants::TablaDeDatos::COLUMN_NAMES`.
+- Acciones de menú contextual gemelas (tabla de resultados vs history) — `agregar_a_favoritos`, `eliminar_seleccion_interfaz`, `eliminar_seleccion_bd`, `restablecer_pagina` — funciones prácticamente idénticas con distintos nombres. Podrían consolidarse en un módulo `TreeViewActions`, aunque el flag `@linea_divisoria_agregada` comparte estado entre ventanas.
+- 3 diccionarios de nombres-legibles manuales (`NOMBRES_CAMPOS`, `label_text`/`set_entry_tooltip`, `HistoryData`): un cambio de nombre de columna requiere actualizar todos. Podrían derivarse de `Constants::TablaDeDatos::COLUMN_NAMES`.
 
 **Recurso: copia temporizada sin transacción**
 - `configuracion_cop_seg.rb` usa solo `FileUtils.cp` sin `BEGIN IMMEDIATE` / `ROLLBACK` como hacen las demás copias. Si SQLite escribe simultáneamente, la copia podría ser inconsistente.

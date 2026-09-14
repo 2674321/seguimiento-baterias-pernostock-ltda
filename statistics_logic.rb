@@ -3,7 +3,6 @@ require 'yaml'
 module Logica
   @@contador_registros = 0
   @@contador_busquedas = 0
-  @@contador_busquedas_ventana_baterias = 0
   @@contador_ediciones = 0
   @@ultimo_respaldo_automatico = nil
   @@contador_historial = 0
@@ -44,12 +43,6 @@ module Logica
   end
   def self.obtener_total_historial
     @@contador_historial
-  end
-  def self.incrementar_contador_busquedas_ventana_baterias
-    @@contador_busquedas_ventana_baterias += 1
-  end
-  def self.obtener_total_busquedas_ventana_baterias
-    @@contador_busquedas_ventana_baterias
   end
   def self.incrementar_contador_rango_fechas
     @@contador_rango_fechas += 1

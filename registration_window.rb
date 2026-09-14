@@ -78,10 +78,6 @@ def create_registration_window(parent)
   history_button = Gtk::Button.new(label: 'Historial')
   history_button.set_size_request(50, 40)
   history_button.set_tooltip_text('Abrir la ventana de historial de Cambios')
-  ventana_baterias_button = Gtk::Button.new(label: 'Ventana de Baterías')
-  ventana_baterias_button.set_size_request(50, 40)
-  ventana_baterias_button.set_tooltip_text('Abrir la ventana de baterías')
-  button_box.pack_start(ventana_baterias_button, expand: false, fill: false, padding: 5)
   button_box.pack_start(history_button, expand: false, fill: false, padding: 5)
   button_box.pack_start(statistics_button, expand: false, fill: false, padding: 5)
   statistics_button.set_margin_right(50)
@@ -106,9 +102,6 @@ def create_registration_window(parent)
   end
   history_button.signal_connect('clicked') do |_button|
     create_history_window
-  end
-  ventana_baterias_button.signal_connect('clicked') do |_button|
-    create_battery_window
   end
 registration_window.show_all
 end

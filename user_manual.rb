@@ -26,7 +26,7 @@ class ManualWindow
     <a href='#boton_guardar'>6. Botón ¨Guardar¨ (Ventana principal)</a>\n
     <a href='#ventana_edicion'>7. Ventana de Edición</a>\n
     <a href='#registro_baterías'>8. Registro de baterías</a>\n
-    <a href='#ventana_baterías'>9. Ventana de baterías</a>\n
+    <a href='#ventana_baterías'>9. Tabla de baterías (Ventana principal)</a>\n
     <a href='#historial_cambios'>10. Historial de cambios</a>\n
     <a href='#estadísticas'>11. Estadísticas</a>\n
     <a href='#config_copia_seguridad'>12. Configuracion copia de segurida (menu con icono de herramientas)</a>\n
@@ -45,7 +45,7 @@ class ManualWindow
     - <b>Botón de Guardar (Ventana principal):</b> Permite guardar los resultados de las consultas de búsqueda en formatos como JSON, DOCX, CSV y TXT.\n\n
     - <b>Ventana de edición:</b> Permite modificar los datos de una batería después de buscarla por su ID, siempre que los cambios cumplan con los requisitos y se ingrese una razón.\n\n
     - <b>Registro de baterías:</b> Permite agregar nuevas baterías a la base de datos a través de un formulario, solicitando datos obligatorios y opcionales según la situación.\n\n
-    - <b>Ventana de baterías:</b> Muestra todas las baterías actuales en la base de datos con sus respectivos datos. Posee un buscador similar al de la ventana principal.\n\n
+    - <b>Tabla de baterías (Ventana principal):</b> Al abrir el programa se muestran todas las baterías de la base de datos. Incluye un buscador por columnas y un menú contextual (editar, eliminar, favoritos, invertir orden).\n\n
     - <b>Historial de cambios:</b> Registra todas las ediciones realizadas a las baterías, y permite hacer consultas y ordenar por fecha y hora.\n\n
     - <b>Estadísticas:</b> Muestra estadísticas sobre el uso del programa, como cantidad de búsquedas, últimas operaciones realizadas, copias de seguridad, etc.\n
     - <b>Configuracion Copias de seguridad:</b> Permite configurar tiempo con el cual se ejecuta cada copia de seguridad temporizada.\n\n\n\n\n\n\n
@@ -54,10 +54,9 @@ class ManualWindow
 
     - <b>Buscadores:</b>\n
     Uso de teclas: Digitando el valor a buscar puede realizar la busqueda presionando el boton ¨Enter¨
-    Los buscadores están disponibles en 3 ventanas:\n
-    - La Ventana Principal (se despliega al ejecutar el programa)\n
-    - La Ventana de Baterías (ubicada en la parte superior derecha del programa, botón: Ventana Baterías)\n
-    - y el Historial (Parte superior).\n
+    Los buscadores están disponibles en 2 ventanas:\n
+    - La Ventana Principal (se despliega al ejecutar el programa, con el listado completo de baterías)\n
+    - y el Historial.\n
 
     Estos buscadores permiten buscar datos por columnas, lo que hace que la búsqueda sea más precisa y versátil.
 
@@ -113,20 +112,20 @@ class ManualWindow
     - <b>Ventana de Edición:</b>\n
     - Digitando el valor de ID o el Motivo de la edicion puede realizar la Busqueda/Guardado Respectivamente presionando el boton ¨Enter¨\n\n
 
-    Esta ventana puede ser accedida desde las ventanas: Ventana principal y Ventana de Baterías.\n
+    Esta ventana puede ser accedida desde la ventana principal.\n
     Esta ventana permite editar las baterías actuales. Para ello, necesitarás el ID de la batería.\n
 
     - <b>Ejemplo de Uso:</b>\n
     1. Ingresa a la ventana de edición haciendo clic en el botón 'Editar' o 'Edición', el cual abrirá la ventana de edición.\n
-    2. Una vez dentro, en el primer campo de entrada (llamado 'ID de la batería'), ingresarás el ID de la batería que necesitas buscar (puedes obtenerlo del buscador, ventana de baterías, etc).\n
+    2. Una vez dentro, en el primer campo de entrada (llamado 'ID de la batería'), ingresarás el ID de la batería que necesitas buscar (puedes obtenerlo de la tabla de baterías de la ventana principal).\n
     3. Ingresarás el ID de la batería y presionarás el botón de búsqueda.\n
     4. Los datos de la batería correspondiente se cargarán en los campos inferiores, los cuales se volverán editables.\n
     5. Una vez realizados los cambios (respetando los requisitos y formatos) y haber escrito el motivo del cambio, presionarás el botón 'Guardar cambios'.\n
-    6. Con eso, los datos serán editados y podrás consultarlos en el buscador o ventana de baterías. Además, podrás consultar el cambio específico que hiciste en el Historial.\n
+    6. Con eso, los datos serán editados y podrás consultarlos en la tabla de baterías de la ventana principal. Además, podrás consultar el cambio específico que hiciste en el Historial.\n
 
     - <b>Registro de Baterías:</b>\n
     Esta ventana es un formulario de registro que permite registrar las baterias en la base de datos.
-    Tiene acceso a las ventanas Baterias, Historial y Estadisticas.\n
+    Tiene acceso a las ventanas Historial y Estadisticas.\n
     Para poder registrar baterias usted tendra que rellenar los campos con la informacion requerida y cumpliendo con los requisitos.
     Los campos que posee un (*) Son <b>obligatorios</b> (Si no tiene la informacion obligatoria al momento del registro puede insertar: <b>PENDIENTE</b>)
     Los datos siguientes: Motivo de Devolución y Estado de recarga Permite solamente ciertos estados.\n
@@ -140,23 +139,22 @@ class ManualWindow
    - Al presionar el ¨Limpiar campos¨ hara que los datos insertados se borren iniciar nuevamente si asi lo requiere.
    - Cuando la Nota de Credito es dejada vacia, usa el valor predeterminado ¨0¨
 
-    - <b>Ventana de Baterías:</b>\n
+    - <b>Tabla de baterías (Ventana principal):</b>\n
       - Uso de teclas:
         - Digitando el valor a buscar puede realizar la busqueda presionando el boton ¨Enter¨
-        - Desplazamiento: Puede desplazarse usando las flechas en el teclado atraves de las distintas filas.
-        - Busqueda rapida: Puede digitar la ID de la bateria y la llevara a la correspondiente bateria,sin necesidad de presionar nada\n\n
-    Esta ventana muestra todas las baterias actuales en la base de datos, con sus respectias columnas.\n
+        - Desplazamiento: Puede desplazarse usando las flechas en el teclado atraves de las distintas filas.\n\n
+    Al abrir el programa, la ventana principal muestra la lista completa de baterías registradas en la base de datos.\n
     Posee un buscador con el cual se puede buscar en base a columnas y acceso a las ventanas de Historial, Estadisticas y Edición.\n
     - <b>Uso:</b>\n
     Al hacer click derecho tras haber seleccionado una linea de datos, se presentaran las siguentes opciones;\n
 
+    - Editar: Abre la ventana de edición con el ID de la batería seleccionada.\n
     - Invertir Orden: Invertira el orden de los datos\n
-    - Restablecer pagina: Esta opcion recargara los datos de la pantalla. \n
+    - Ver todas las baterías: Recargara todos los datos de la base de datos en la pantalla (útil tras una búsqueda).\n
     - Agregar a favoritos: Esta opcion movera los datos seleccionados a la parte superior de la ventana separado de los demas datos \n
-    - Eliminar (Interfaz): Esta opcion eliminara temporalmente la bateria de la interfaz (aparecera nuevamente al restablecer la pagina) \n
+    - Eliminar (Interfaz): Esta opcion eliminara temporalmente la bateria de la interfaz (aparecera nuevamente al ver todas las baterias) \n
     - Eliminar (Base de datos): Esta opcion eliminara la bateria seleccionada de la base de datos \n
 
-    Es una ventana de analisis, no necesita intrucciones.
     Para saber como usar las demas ventanas o el buscador puede ir a las siguientes secciones;\n
     1. <a href='#buscadores'>Buscadores</a>\n
     2. <a href='#ventana_edicion'>Ventana de Edición</a>\n
@@ -200,7 +198,6 @@ class ManualWindow
     - Búsquedas totales (EP)\n
     - Cantidad de copias de seguridad manuales (EP)\n
     - Búsquedas en la ventana de Historial (EP)\n
-    - Búsqueda en la ventana de Baterías (EP)\n
     - Búsquedas en el rango de fechas (EP)\n
 
     - <b>Ejemplo de Uso:</b>\n
