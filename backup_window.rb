@@ -2,11 +2,11 @@ require 'gtk3'
 require 'sqlite3'
 require 'fileutils'
 require 'date'
-require_relative'constants'
-require_relative'backup_window_logic'
+require_relative 'constants'
+require_relative 'backup_window_logic'
 require_relative 'statistics_logic'
 BACKUP_FOLDER = 'Copias_de_seguridad'.freeze
-BACKUP_PATH = File.join(File.dirname(__FILE__), BACKUP_FOLDER)
+BACKUP_PATH = File.join(__dir__, BACKUP_FOLDER)
 def create_backup_folder
   backup_subfolder = File.join(BACKUP_PATH, 'copias_de_seguridad_manual')
   Dir.mkdir(backup_subfolder) unless Dir.exist?(backup_subfolder)
@@ -34,8 +34,10 @@ def backup_database_with_progress(backup_filename, progress_bar)
   db.execute('BEGIN IMMEDIATE')
   10.times do |i|
     sleep(0.1)
-    progress_bar.fraction = (i + 1) / 10.0
-    Gtk.main_iteration while Gtk.events_pending?
+    GLib::Idle.add do
+      progress_bar.fraction = (i + 1) / 10.0
+      false
+    end
   end
   FileUtils.cp(NOMBRE_DB, backup_file)
   db.execute('ROLLBACK')

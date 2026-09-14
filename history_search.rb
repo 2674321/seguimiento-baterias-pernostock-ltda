@@ -1,4 +1,5 @@
 require_relative 'statistics_logic'
+require_relative 'message_helper'
 class HistorySearch
   COLUMNS = ['ID CAMBIO', 'Fecha y Hora', 'Campo Modificado', 'Valores Anteriores', 'Valores Nuevos', 'Razón Cambio', 'ID BATERIA']
   def self.search_history(history_data, search_text, column_index, list_store)

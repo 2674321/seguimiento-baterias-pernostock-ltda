@@ -1,3 +1,5 @@
+require 'gtk3'
+require 'fileutils'
 def guardar_resultados(result_label, window)
   results_text = result_label.text
   dialog = Gtk::FileChooserDialog.new(
@@ -5,8 +7,8 @@ def guardar_resultados(result_label, window)
     parent: window,
     action: :save,
     buttons: [
-      [Gtk::Stock::CANCEL, :cancel],
-      [Gtk::Stock::SAVE, :ok]
+      ['Cancelar', :cancel],
+      ['Guardar', :ok]
     ]
   )
   dialog.set_do_overwrite_confirmation(true)

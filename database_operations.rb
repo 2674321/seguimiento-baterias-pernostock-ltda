@@ -14,10 +14,10 @@ def tabla_de_datos_creada?
   end
 end
 def configurar_base_de_datos
-  unless tabla_de_datos_creada?
-    db = setup_database
-    begin
-      db.execute <<-SQL
+  return if tabla_de_datos_creada?
+  db = setup_database
+  begin
+    db.execute <<-SQL
       CREATE TABLE IF NOT EXISTS tabla_de_datos (
         ID INTEGER PRIMARY KEY AUTOINCREMENT,
         MODELO TEXT NULL,
@@ -35,46 +35,18 @@ def configurar_base_de_datos
         DESTINO TEXT NULL,
         COMENTARIOS TEXT NULL
       );
-      SQL
-      if db.table_info('tabla_de_datos').empty?
-        puts "La tabla 'tabla_de_datos' no se creó correctamente."
-      else
-        db.execute("CREATE TABLE IF NOT EXISTS #{TABLE_CREATED_FLAG} (created INTEGER);")
-        db.execute("INSERT INTO #{TABLE_CREATED_FLAG} (created) VALUES (1);")
-      end
-    rescue SQLite3::Exception => e
-      puts "Error al configurar la base de datos: #{e.message}"
-    ensure
-      db.close if db
-    end
-  else
-  end
-end
-def insertar_datos(db, datos)
-  begin
-    db = setup_database
-    datos.each do |fila|
-      column_names = Constants::TablaDeDatos::COLUMN_NAMES.keys[1..-1].join(', ')
-      placeholders = (['?'] * (Constants::TablaDeDatos::COLUMN_NAMES.size - 1)).join(', ')
-      insert_query = "INSERT INTO tabla_de_datos (#{column_names}) VALUES (#{placeholders})"
-      db.execute(insert_query, fila[0..-1])
+    SQL
+    if db.table_info('tabla_de_datos').empty?
+      puts "La tabla 'tabla_de_datos' no se creó correctamente."
+    else
+      db.execute("CREATE TABLE IF NOT EXISTS #{TABLE_CREATED_FLAG} (created INTEGER);")
+      db.execute("INSERT INTO #{TABLE_CREATED_FLAG} (created) VALUES (1);")
     end
   rescue SQLite3::Exception => e
-    puts "Error al insertar datos: #{e.message}"
+    puts "Error al configurar la base de datos: #{e.message}"
   ensure
     db.close if db
   end
-end
-def check_initial_data_inserted(db, data)
-  db = setup_database
-  data.each do |row|
-    query = "SELECT COUNT(*) FROM tabla_de_datos WHERE MODELO = ? AND SERIE = ? AND RECEPCION = ?"
-    count = db.execute(query, row[0], row[1], row[2]).flatten[0]
-    return true if count > 0
-  end
-  false
-ensure
-  db.close if db
 end
 def configurar_tabla_de_registro
   db = setup_database
@@ -93,6 +65,22 @@ def configurar_tabla_de_registro
     SQL
   rescue SQLite3::Exception => e
     puts "Error al configurar la tabla de registro: #{e.message}"
+  ensure
+    db.close if db
+  end
+end
+def insertar_datos(datos = [])
+  return if datos.nil? || datos.empty?
+  db = setup_database
+  begin
+    datos.each do |fila|
+      column_names = Constants::TablaDeDatos::COLUMN_NAMES.keys[1..-1].join(', ')
+      placeholders = (['?'] * (Constants::TablaDeDatos::COLUMN_NAMES.size - 1)).join(', ')
+      insert_query = "INSERT INTO tabla_de_datos (#{column_names}) VALUES (#{placeholders})"
+      db.execute(insert_query, fila[0..-1])
+    end
+  rescue SQLite3::Exception => e
+    puts "Error al insertar datos: #{e.message}"
   ensure
     db.close if db
   end

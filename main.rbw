@@ -1,6 +1,5 @@
 require 'gtk3'
 require 'sqlite3'
-load 'reemplazo_de_datos.rb'
 require_relative 'statistics_logic'
 require_relative 'constants'
 require_relative 'database_operations'
@@ -10,29 +9,14 @@ require_relative 'battery_window'
 require_relative 'registration_window'
 require_relative 'backup_exit'
 require_relative 'show_loading_window'
-data_to_insert = []
-def insert_initial_data_if_needed(data)
-  begin
-    loading_window = show_loading_window(5)
-    db = SQLite3::Database.new(NOMBRE_DB)
-    configurar_base_de_datos
-    unless check_initial_data_inserted(db, data)
-      insertar_datos(db, data)
-    end
-    create_interface(Constants::TablaDeDatos::COLUMN_NAMES)
-    loading_window.destroy unless loading_window.destroyed?
-    Gtk.main
-  rescue StandardError => e
-    puts e.backtrace
-    gets
-  end
+def insert_initial_data_if_needed
+  loading_window = show_loading_window(5)
+  configurar_base_de_datos
+  create_interface(Constants::TablaDeDatos::COLUMN_NAMES)
+  loading_window.destroy unless loading_window.destroyed?
+  Gtk.main
+rescue StandardError => e
+  puts e.backtrace.join("\n")
+  puts "Se produjo un error al iniciar la aplicación. Detalles arriba."
 end
-def check_and_create_indicator_table(db)
-  indicator_table_exists = db.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='#{INDICATOR_TABLE_NAME}';").any?
-  unless indicator_table_exists
-    db.execute("CREATE TABLE #{INDICATOR_TABLE_NAME} (inserted INTEGER);")
-    db.execute("INSERT INTO #{INDICATOR_TABLE_NAME} (inserted) VALUES (0);")
-  else
-  end
-end
-insert_initial_data_if_needed(data_to_insert)
+insert_initial_data_if_needed

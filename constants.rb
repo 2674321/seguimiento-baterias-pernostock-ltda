@@ -1,6 +1,5 @@
 require 'sqlite3'
 MAX_LONGITUD_GENERAL = 256
-INDICATOR_TABLE_NAME = 'indicadores'.freeze
 NOMBRE_DB = 'base_de_datos.db'.freeze
 TABLE_CREATED_FLAG = 'flag_de_creacion_de_tabla'.freeze
 module Constants

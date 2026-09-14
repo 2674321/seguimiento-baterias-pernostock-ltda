@@ -1,11 +1,13 @@
 require 'gtk3'
-require_relative 'search_logic'
+require_relative 'message_helper'
 require_relative 'constants'
-require_relative 'interface_setup'
 require_relative 'date_search_validators'
 require_relative 'statistics_logic'
+require_relative 'search_logic'
 class DateSearchWindow
   include SearchLogic
+  DATE_COLUMNS = ["Todas", "RECEPCION", "FECHA_C", "FECHA_NC", "FECHA_ENVIO"].freeze
+
   def initialize(date_entry_box)
     @date_entry_box = date_entry_box
     @tree_view = Gtk::TreeView.new
@@ -14,7 +16,7 @@ class DateSearchWindow
 
   def interfaz_date_search_window
     @main_window.show_all
-    Gtk.main
+    @main_window
   end
   private
   def show_error_message(error_type, custom_message = nil)
@@ -36,7 +38,7 @@ class DateSearchWindow
               when :invalid_day
                 custom_message || "El día no es válido para el mes y año dados."
               else
-                "Las fechas no son válidas o están fuera del rango permitido."
+                custom_message || "Las fechas no son válidas o están fuera del rango permitido."
               end
     dialog = Gtk::MessageDialog.new(
       parent: @main_window,
@@ -49,10 +51,8 @@ class DateSearchWindow
     dialog.destroy
   end
   def build_ui
-    @main_window = Gtk::Window.new('Date Search')
-    @main_window.signal_connect('destroy') { Gtk.main_quit }
-    style_context = @main_window.style_context
-    style_context.add_class('linked')
+    @main_window = Gtk::Window.new('Búsqueda por Rango de Fechas')
+    @main_window.signal_connect('destroy') { @main_window.destroy }
     @main_window.set_default_size(400, 500)
     @main_window.set_position(Gtk::WindowPosition::CENTER)
     box = Gtk::Box.new(:vertical, 5)
@@ -67,9 +67,7 @@ class DateSearchWindow
     start_entry.set_margin_bottom(5)
     end_entry.set_margin_bottom(5)
     column_select = Gtk::ComboBoxText.new
-    ["Todas", "RECEPCION", "FECHA_C", "FECHA_NC", "FECHA_ENVIO"].each do |value|
-      column_select.append_text(value)
-    end
+    DATE_COLUMNS.each { |value| column_select.append_text(value) }
     column_select.active = 0
     column_select.tooltip_text = 'Seleccione una columna para buscar'
     column_select.set_margin_bottom(10)
@@ -77,11 +75,10 @@ class DateSearchWindow
     button_box.layout_style = Gtk::ButtonBoxStyle::CENTER
     button = Gtk::Button.new(label: 'Buscar')
     button.tooltip_text = 'Realizar búsqueda'
-    scroll = Gtk::ScrolledWindow.new
-    scroll.set_policy(:automatic, :automatic)
-    @tree_view = Gtk::TreeView.new
     @tree_view.headers_visible = true
     @tree_view.selection.mode = Gtk::SelectionMode::SINGLE
+    scroll = Gtk::ScrolledWindow.new
+    scroll.set_policy(:automatic, :automatic)
     scroll.add(@tree_view)
     @tree_view.signal_connect('button_press_event') do |widget, event|
       if event.button == Gdk::BUTTON_SECONDARY
@@ -129,32 +126,21 @@ class DateSearchWindow
     box.pack_start(button_box, expand: false, fill: false, padding: 0)
     box.pack_start(scroll, expand: true, fill: true, padding: 5)
     @main_window.add(box)
-    @main_window.show_all
-    def delete_selected_data
-      selection = @tree_view.selection
-      if selection.count_selected_rows > 0
-        selected_iter = selection.selected
-        @tree_view.model.remove(selected_iter)
-      else
-        show_error_message(:no_battery_selected, "Por favor, seleccione una fila para eliminar.")
-      end
+  end
+  def delete_selected_data
+    selection = @tree_view.selection
+    if selection.count_selected_rows > 0
+      selected_iter = selection.selected
+      @tree_view.model.remove(selected_iter)
+    else
+      show_error_message(:no_battery_selected, "Por favor, seleccione una fila para eliminar.")
     end
   end
   def show_search_results(results)
     store = Gtk::ListStore.new(String, String, String)
-    @tree_view.columns.each do |column|
-      @tree_view.remove_column(column)
-    end
+    @tree_view.columns.each { |column| @tree_view.remove_column(column) }
     if results.empty?
-      dialog = Gtk::MessageDialog.new(
-        parent: nil,
-        flags: Gtk::DialogFlags::DESTROY_WITH_PARENT,
-        type: Gtk::MessageType::INFO,
-        buttons: Gtk::ButtonsType::CLOSE,
-        message: "No se encontraron resultados."
-      )
-      dialog.run
-      dialog.destroy
+      show_error_message(:no_results, "No se encontraron resultados.")
     else
       results.each do |column_name, rows|
         rows.each do |row|
@@ -165,32 +151,34 @@ class DateSearchWindow
         end
       end
     end
-    columns = ['ID Bateria', 'Columna', 'Fecha']
-    columns.each_with_index do |title, i|
+    ['ID Bateria', 'Columna', 'Fecha'].each_with_index do |title, i|
       renderer = Gtk::CellRendererText.new
       column = Gtk::TreeViewColumn.new(title, renderer, text: i)
       @tree_view.append_column(column)
       column.clickable = true
-      column.signal_connect('clicked') do |_widget|
-        sort_column(i)
-      end
+      column.signal_connect('clicked') { sort_column(i) }
     end
     @tree_view.model = store
   end
   def sort_column(column_index)
     model = @tree_view.model
+    return unless model
     sorted_data = []
-    model.each do |model, path, iter|
-      sorted_data << [model.get_value(iter, 0), model.get_value(iter, 1), model.get_value(iter, 2)]
+    model.each do |mdl, _path, iter|
+      sorted_data << [mdl.get_value(iter, 0), mdl.get_value(iter, 1), mdl.get_value(iter, 2)]
     end
-    sorted_data.sort_by! { |row| row[1].to_i }
-    sorted_data.reverse! if @last_sorted_column == column_index && @last_sorted_order == :asc
+    sorted_data = sorted_data.sort_by { |row| row[column_index].to_s.downcase }
+    if @last_sorted_column == column_index
+      sorted_data.reverse! if @last_sorted_order == :asc
+      @last_sorted_order = (@last_sorted_order == :asc ? :desc : :asc)
+    else
+      @last_sorted_column = column_index
+      @last_sorted_order = :asc
+    end
     model.clear
     sorted_data.each do |row|
       iter = model.append
       iter.set_values(row)
     end
-    @last_sorted_column = column_index
-    @last_sorted_order = (@last_sorted_order == :asc ? :desc : :asc)
   end
 end

@@ -100,21 +100,6 @@ def create_battery_window
   time_label.halign = :end
   time_label.valign = :start
   time_label.margin_right = 10
-  def update_time_label(label)
-    return unless label && !label.destroyed?
-    begin
-      current_time = Time.now
-      formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
-      label.text = "#{formatted_time}"
-    rescue StandardError => e
-      puts "Error updating time label: #{e.message}"
-      puts e.backtrace.join("\n")
-    end
-  end
-  def on_destroy(window)
-    @battery_window_open = false
-    GLib::Source.remove(@timeout_id) if @timeout_id
-  end
   time_box = Gtk::Box.new(:horizontal, 10)
   time_box.pack_end(time_label, expand: false, fill: false, padding: 5)
   box.pack_end(time_box, expand: false, fill: false, padding: 5)
@@ -191,4 +176,17 @@ def create_battery_window
 end
 def editar_baterias(id)
   create_edit_window(id)
+end
+def update_time_label(label)
+  return unless label && !label.destroyed?
+  begin
+    label.text = Time.now.strftime("%Y-%m-%d %H:%M:%S")
+  rescue StandardError => e
+    puts "Error updating time label: #{e.message}"
+    puts e.backtrace.join("\n")
+  end
+end
+def on_destroy(_window)
+  @battery_window_open = false
+  GLib::Source.remove(@timeout_id) if @timeout_id
 end

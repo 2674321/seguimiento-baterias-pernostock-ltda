@@ -1,3 +1,5 @@
+require 'gtk3'
+require 'fileutils'
 def create_backup_window_with_progress
   backup_window = Gtk::Window.new('Ventana para Copia de Seguridad')
   backup_window.set_default_size(350, 140)
@@ -16,8 +18,8 @@ def create_backup_window_with_progress
       transient_for: backup_window,
       flags: Gtk::DialogFlags::MODAL,
       title: 'Confirmar cierre',
-      buttons: [[Gtk::Stock::YES, Gtk::ResponseType::YES],
-                [Gtk::Stock::NO, Gtk::ResponseType::NO]]
+      buttons: [['Sí', Gtk::ResponseType::YES],
+                ['No', Gtk::ResponseType::NO]]
     )
     dialog.child.add(Gtk::Label.new('¿Estás seguro de que quieres salir?'))
     dialog.set_position(Gtk::WindowPosition::CENTER)
@@ -25,19 +27,14 @@ def create_backup_window_with_progress
     dialog.valign = :center
     dialog.halign = :center
     response = dialog.run
-    if response == Gtk::ResponseType::YES
-      dialog.destroy
-      backup_window.hide
-    else
-      dialog.destroy
-    end
+    dialog.destroy
+    backup_window.hide if response == Gtk::ResponseType::YES
   end
   progress_bar = Gtk::ProgressBar.new
   progress_bar.set_hexpand(true)
   progress_bar.set_show_text(true)
   save_button.signal_connect('clicked') do
-    confirmed = show_confirmation_dialog(backup_window)
-    if confirmed
+    if show_confirmation_dialog(backup_window)
       backup_filename = "Copia_de_seguridad_#{Time.now.strftime('%Y-%m-%d-%H-%M-%S')}.db"
       Thread.new do
         backup_database_with_progress(backup_filename, progress_bar)
@@ -45,23 +42,22 @@ def create_backup_window_with_progress
     end
   end
   load_button.signal_connect('clicked') do
-    relative_path = ""
-    absolute_path = File.expand_path(relative_path, File.dirname(__FILE__))
+    absolute_path = __dir__
     dialog = Gtk::FileChooserDialog.new(
       title: 'Seleccionar archivo de base de datos',
       parent: backup_window,
       action: Gtk::FileChooserAction::OPEN,
       buttons: [
-        [Gtk::Stock::CANCEL, Gtk::ResponseType::CANCEL],
-        [Gtk::Stock::OPEN, Gtk::ResponseType::ACCEPT]
+        ['Cancelar', Gtk::ResponseType::CANCEL],
+        ['Abrir', Gtk::ResponseType::ACCEPT]
       ]
     )
     dialog.set_current_folder(absolute_path)
-    dialog.add_filter(Gtk::FileFilter.new)
-    dialog.filter.add_pattern('*.db')
-    dialog.filter.name = 'Archivos de base de datos (*.db)'
-    response = dialog.run
-    if response == Gtk::ResponseType::ACCEPT
+    filter_db = Gtk::FileFilter.new
+    filter_db.name = 'Archivos de base de datos (*.db)'
+    filter_db.add_pattern('*.db')
+    dialog.add_filter(filter_db)
+    if dialog.run == Gtk::ResponseType::ACCEPT
       filename = dialog.filename
       destination_file = File.join(absolute_path, 'base_de_datos.db')
       FileUtils.cp(filename, destination_file, preserve: true)
