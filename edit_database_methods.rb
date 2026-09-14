@@ -4,14 +4,15 @@ require_relative 'message_helper'
 require_relative 'edit_validation'
 require_relative 'constants'
 def retrieve_battery_data(id)
+  db = nil
   begin
     db = SQLite3::Database.open(NOMBRE_DB)
-    battery_data = db.execute("SELECT * FROM tabla_de_datos WHERE ID = ?", id).first
-    db.close
-    battery_data
+    db.execute("SELECT * FROM tabla_de_datos WHERE ID = ?", id).first
   rescue SQLite3::Exception => error
     puts "Error al recuperar datos de la batería: #{error.message}"
     nil
+  ensure
+    db.close if db
   end
 end
 def update_edit_grid_fields(edit_grid, battery_data)

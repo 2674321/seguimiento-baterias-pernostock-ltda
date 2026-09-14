@@ -87,7 +87,7 @@ class DateSearchWindow
         end
         menu.append(item)
         menu.show_all
-        menu.popup(nil, nil, event.button, event.time)
+        menu.popup_at_pointer(event)
       end
     end
     button_box.add(button)

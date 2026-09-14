@@ -82,7 +82,7 @@ def create_history_window
       end
       menu.append(item_eliminar_bd_historial)
       menu.show_all
-      menu.popup(nil, nil, event.button, event.time)
+      menu.popup_at_pointer(event)
     end
     false
   end

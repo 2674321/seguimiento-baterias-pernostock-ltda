@@ -88,6 +88,8 @@ def create_interface(columns)
         search_data(valor, result_label, index, columns, database)
       rescue StandardError => e
         show_message_dialog("Error", "Error en la búsqueda: #{e.message}")
+      ensure
+        database.close if database
       end
     end
   end
