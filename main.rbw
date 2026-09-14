@@ -1,4 +1,5 @@
 require 'gtk3'
+Gtk::Window.set_default_icon_name("seguimiento-baterias-pernostock")
 require 'sqlite3'
 require_relative 'statistics_logic'
 require_relative 'constants'
