@@ -1,6 +1,8 @@
+require 'sqlite3'
 require_relative 'validacion_inputs_edit'
 require_relative 'message_helper'
 require_relative 'edit_validation'
+require_relative 'constants'
 def retrieve_battery_data(id)
   begin
     db = SQLite3::Database.open(NOMBRE_DB)
@@ -41,7 +43,6 @@ def process_changed_fields(changed_fields, id, edit_grid, comment)
       replace_data_in_database(changed_fields, id, comment)
       clear_entry_fields(edit_grid)
     end
-    fecha_c_changed = changed_fields.any? { |field_data| field_data[:field] == 'FECHA_C' }
   rescue StandardError => error
     puts "Error al procesar campos cambiados: #{error.message}"
   ensure
@@ -54,24 +55,6 @@ def collect_original_data(id)
   rescue StandardError => error
     puts "Error al recuperar datos originales: #{error.message}"
   end
-end
-def collect_changed_fields(edit_grid, changed_fields)
-  begin
-    Constants::TablaDeDatos::COLUMN_NAMES.each_with_index do |(_key, value), index|
-      entry = edit_grid.get_child_at(1, index)
-      entry_text = entry.text.to_s.strip
-      original_value = @original_field_values.fetch(value, '').to_s.strip
-      if entry.is_a?(Gtk::Entry) && entry_text != original_value && !entry_text.empty?
-        changed_fields << { field: value, original: original_value, new: entry_text }
-      end
-    end
-    changed_fields.select! { |field_data| field_data[:original] != field_data[:new] }
-  rescue StandardError => error
-    puts "Error al recoger campos editados: #{error.message}"
-  end
-end
-def required_fields_valid?(column_entries, required_fields)
-  required_fields.all? { |field| !column_entries[field.to_sym].text.empty? }
 end
 def display_changed_fields(changed_fields)
   begin
@@ -91,6 +74,6 @@ def display_changed_fields(changed_fields)
       show_message(message)
     end
   rescue StandardError => error
-    log_error("Error al mostrar campos cambiados: #{error.message}")
+    puts "Error al mostrar campos cambiados: #{error.message}"
   end
 end

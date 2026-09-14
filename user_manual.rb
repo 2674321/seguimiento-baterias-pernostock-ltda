@@ -1,3 +1,4 @@
+require 'gtk3'
 class ManualWindow
   def initialize(parent)
     @parent = parent

@@ -38,7 +38,6 @@ def create_history_window
   tree_view.set_headers_visible(true)
   tree_view.set_rules_hint(true)
   tree_view.set_width_request(-1)
-  renderer = Gtk::CellRendererText.new
   columns = ['ID CAMBIO', 'Fecha y Hora', 'Campo Modificado', 'Valores Anteriores', 'Valores Nuevos', 'Motivo Edición', 'ID BATERIA']
   columns.each_with_index do |col_title, col|
     renderer = Gtk::CellRendererText.new

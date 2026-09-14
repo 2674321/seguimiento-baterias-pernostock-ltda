@@ -3,22 +3,21 @@ require_relative 'database_operations'
 require 'sqlite3'
 class HistoryData
   def self.get_data_from_database
-    begin
-      db = setup_database
-      query = <<-SQL
-        SELECT ID, FECHA_HORA, CAMPO_MODIFICADO, VALOR_ANTERIOR, VALOR_NUEVO, RAZON_CAMBIO, ID_BATERIA
-        FROM tabla_de_registro;
-      SQL
-      results = db.execute(query)
-      results = format_results(results)
-      return results
-    rescue SQLite3::Exception => e
-   #   puts "ERROR: Ha ocurrido una excepción SQLite3 - #{e.message}"
-    rescue StandardError => e
-   #   puts "ERROR: Ha ocurrido una excepción - #{e.message}"
-    ensure
-      db.close if db
-    end
+    db = setup_database
+    query = <<-SQL
+      SELECT ID, FECHA_HORA, CAMPO_MODIFICADO, VALOR_ANTERIOR, VALOR_NUEVO, RAZON_CAMBIO, ID_BATERIA
+      FROM tabla_de_registro;
+    SQL
+    results = db.execute(query)
+    format_results(results)
+  rescue SQLite3::Exception => e
+    puts "ERROR: Ha ocurrido una excepción SQLite3 - #{e.message}"
+    []
+  rescue StandardError => e
+    puts "ERROR: Ha ocurrido una excepción - #{e.message}"
+    []
+  ensure
+    db.close if db
   end
   def self.format_results(results)
     results.each do |row|

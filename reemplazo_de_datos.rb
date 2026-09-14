@@ -1,6 +1,7 @@
 require_relative 'constants'
 require 'sqlite3'
 require_relative 'statistics_logic'
+require_relative 'message_helper'
 module REEMPLAZO_DE_DATOS
   def self.reemplazar_datos(id, changed_fields)
     begin
@@ -8,7 +9,7 @@ module REEMPLAZO_DE_DATOS
       db.transaction
       set_clause = changed_fields.transform_values { |value| limpiar_valor(value) }.map { |key, value| "#{key} = ?" }.join(', ')
       update_query = "UPDATE tabla_de_datos SET #{set_clause} WHERE id = ?"
-      db.execute(update_query, *changed_fields.values, id)
+      db.execute(update_query, changed_fields.values + [id])
       db.commit
       Logica.incrementar_contador_ediciones
       total_ediciones = Logica.obtener_total_ediciones
