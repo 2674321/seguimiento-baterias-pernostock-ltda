@@ -257,6 +257,11 @@ Rechazo del CSS del tema claro forzado (`app_theme.rb`) — el usuario indicó q
 - **Causa raíz**: en `main.rbw` anterior, `GLib::Idle.add` ejecutaba `create_interface` de forma síncrona **antes** de que la ventana de carga pudiera pintarse (GTK no procesa eventos de dibujo hasta que `Gtk.main` ejecuta iteraciones del loop). La ventana se creaba y se destruía instantáneamente, sin que el usuario jamás la viera.
 - **Resolución**: init ahora corre vía `GLib::Timeout.add(400)` (400ms tras Gtk.main, dando tiempo a GTK para pintar la ventana), y destrucción garantizada tras mínimo 2.5s en pantalla. Durante el init (~2.7s), la ventana de carga permanece visible (congelada al estar el loop bloqueado). Al finalizar, se fuerza un mínimo adicional de display para que se perciba como una pantalla de carga real.
 
+**Corrección del orden de las ventanas (bug detectado tras la séptima pasada)**
+- **Causa raíz**: `create_interface` llamaba `window.show_all` al final, así que la ventana principal se hacía visible de inmediato mientras la de carga aún estaba en pantalla → la UI principal se superponía sobre la carga.
+- **Resolución**: la ventana principal se construye ahora **oculta** (`create_interface` ya no hace `show_all`; `main.rbw` la oculta con `visible = false`) y solo se muestra **después** de destruir la ventana de carga (`main_window.visible = true`), con el fade-in del `Gtk::Revealer` disparado vía `GLib::Timeout` (80ms) en lugar de `GLib::Idle`.
+- **Nota**: `GLib::Idle.add` no se dispara de forma fiable en este entorno ruby-gtk3 cuando se agenda desde un callback de `GLib::Timeout` (sí lo hace desde señales GTK como `realize`). Por eso el fade-in usa `GLib::Timeout` corto.
+
 **Eliminación del tema de colores forzado**
 - `app_theme.rb` eliminado (git rm). Se eliminaron todas las llamadas a `AppTheme.install` en `main.rbw` y `show_loading_window.rb`.
 - Los label con name `brand`/`hint` y la clase `splash` fueron removidos; los widgets usan ahora los estilos GTK nativos del sistema (dark mode respectado).
@@ -266,7 +271,7 @@ Rechazo del CSS del tema claro forzado (`app_theme.rb`) — el usuario indicó q
   - Árbol de búsqueda reemplazado por `Gtk::Grid` alineado con `column_spacing` uniforme.
   - `entry_serie` con `hexpand=true` para ocupar ancho disponible.
   - Botones de acción reagrupados en `Gtk::ButtonBox` con `layout = EXPAND` (distribución uniforme).
-  - Contenido principal envuelto en `Gtk::Revealer` (transition_type: `CROSSFADE`, duration: 600ms) — **fade-in** al mostrar la ventana principal.
+  - Contenido principal envuelto en `Gtk::Revealer` (transition_type: `CROSSFADE`, duration: 600ms) — **fade-in** de la ventana principal, disparado desde `main.rbw` vía `GLib::Timeout` (80ms) al mostrar la ventana (no desde `interface_setup.rb`).
   - Ventana tamaño `640×560`.
   - `result_label.selectable = true`.
 - **Ventana de carga: indicador de porcentaje**
@@ -274,7 +279,7 @@ Rechazo del CSS del tema claro forzado (`app_theme.rb`) — el usuario indicó q
   - Ventana `resizable=false`, tamaño `420×260`.
   - Timer de auto-destrucción eliminado; el caller (`main.rbw`) es responsable de destruir la ventana con duración mínima garantizada.
 
-Verificación: `ruby -c` todos los archivos; advertencias preexistentes (`user_manual.rb`, `write_xlsx`, requires circulares) sin cambios. Smoke headless: `show_loading_window` → ventana visible a 500ms, destroy vía timeout OK; `create_interface` → ventana principal visible, Revealer idle-triggered, destroy limpio sin GLib-CRITICAL. App real: loading y main capturados (PNG válidos); DB preservada (7 filas); sin nuevos warnings.
+Verificación: `ruby -c` todos los archivos; advertencias preexistentes (`user_manual.rb`, `write_xlsx`, requires circulares) sin cambios. Smoke headless: `show_loading_window` → ventana visible a 500ms, destroy vía timeout OK; `create_interface` → ventana principal oculta hasta que loading termina, luego `visible=true` + Revealer fade-in vía Timeout; destroy limpio sin GLib-CRITICAL. App real: capturas a 1s (solo loading) y 3s (main) con tamaños diferenciados (ausencia de superposición); DB preservada (7 filas); sin nuevos warnings.
 
 ## Pendiente/mejoras futuras (no bloqueantes)
 
