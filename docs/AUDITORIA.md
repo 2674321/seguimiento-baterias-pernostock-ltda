@@ -240,7 +240,14 @@ Reforma visual y corrección del flujo de arranque, verificada con tests automat
 - Script `_scripts/dev/reset_db_prueba.rb`: crea `base_de_datos.db` (gitignored) con 7 filas de ejemplo para testing local.
 - Ejecutado: `base_de_datos.db` regenerada con 7 filas (modelo serie cliente vendedor recarga destino etc.).
 
-Verificación: `ruby -c` en todos los archivos; flujo de arranque completo con loading → main (ventana de carga efectivamente se pinta y se destruye al finalizar init); render X11 de las 8 ventanas con tema aplicado; app real lanzada sin errores; capturas de pantalla de loading y ventana principal verificadas; test de timeout de duración de la ventana de carga. 
+**Corrección del script de datos de prueba (bug de directorio)**
+- **Causa raíz**: `reset_db_prueba.rb` hacía `Dir.chdir(File.expand_path('../../..', __dir__))`. Desde `_scripts/dev/` eso sube TRES niveles (a `Documentos/07_Proyectos/`) en vez de dos, así que las 7 filas de ejemplo se escribían en
+  `Documentos/07_Proyectos/base_de_datos.db`, dejando la DB del repositorio vacía. Por eso "Buscar" no devolvía nada (0 filas en `tabla_de_datos`).
+- **Resolución**: corregido a `File.expand_path('../..', __dir__)`. Verificado: se limpia el archivo extraviado y `base_de_datos.db` queda con 7 filas en la raíz del repo.
+- **Verificación del flujo de búsqueda**: con la DB semilla, `search_data("YB3L", label, 1, ...)` encuentra 2 filas (índice 1 = MODELO) y `construct_result` genera el texto formateado correcto; `contador_busqueda` incrementa el contador (55 búsquedas acumuladas históricamente).
+- `configurar_base_de_datos` preserva datos existentes (`CREATE TABLE IF NOT EXISTS` + retorno temprano si la tabla ya existe), así que lanzar la app no borra el seed.
+
+Verificación: `ruby -c` en todos los archivos; flujo de arranque completo con loading → main (ventana de carga efectivamente se pinta y se destruye al finalizar init); render X11 de las 8 ventanas con tema aplicado; app real lanzada sin errores; capturas de pantalla de loading y ventana principal verificadas; test de timeout de duración de la ventana de carga; DB semilla persistente al lanzar la app (EXIT=124 timeout esperado). 
 
 ## Pendiente/mejoras futuras (no bloqueantes)
 
