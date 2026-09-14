@@ -13,13 +13,3 @@ def limpiar_entrada(texto)
   cleaned_text = cleaned_text.split.join(' ')
   cleaned_text.empty? ? nil : cleaned_text
 end
-def redefine_datos_originales(column_entries, comment_entry)
-  datos_a_insertar = {}
-  column_entries.each do |key, entry|
-    validate_length(entry.text)
-    datos_a_insertar[key] = entry.text
-  end
-  validate_length(comment_entry.text)
-  datos_a_insertar[:COMENTARIOS] = comment_entry.text
-  datos_a_insertar
-end

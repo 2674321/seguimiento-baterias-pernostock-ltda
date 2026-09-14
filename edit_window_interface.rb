@@ -142,24 +142,6 @@ def create_edit_window(id = nil)
       edit_grid.attach(entry, 1, index, 2, 1)
     end
   end
-  button_box = Gtk::ButtonBox.new(Gtk::Orientation::HORIZONTAL)
-  button_box.layout = Gtk::ButtonBoxStyle::END
-  exit_button = Gtk::Button.new(label: 'Cerrar')
-  exit_button.width_request = 150
-  exit_button.set_halign(Gtk::Align::CENTER)
-  save_button = Gtk::Button.new(label: 'Guardar cambios')
-  save_button.width_request = 150
-  save_button.set_tooltip_text('Guarda los datos editados para su reintegración en la base de datos.')
-  save_button.set_halign(Gtk::Align::CENTER)
-  open_window_button = Gtk::Button.new(label: 'Estadísticas')
-  open_window_button.width_request = 150
-  open_window_button.set_tooltip_text('Abrir la ventana de estadísticas de operaciones')
-  open_window_button.signal_connect('clicked') do |_button|
-    Interfaz.ventana_de_estadisticas
-  end
-  exit_button.signal_connect("clicked") do
-    edit_window.close
-  end
   comment_label = Gtk::Label.new('Motivo de la Edición *')
   comment_label.set_hexpand(true)
   comment_label.set_margin_end(10)
@@ -190,6 +172,10 @@ def create_edit_window(id = nil)
   exit_button.signal_connect("clicked") do
     edit_window.close
   end
+  save_button = Gtk::Button.new(label: 'Guardar cambios')
+  save_button.width_request = 150
+  save_button.set_tooltip_text('Guarda los datos editados para su reintegración en la base de datos.')
+  save_button.set_halign(Gtk::Align::CENTER)
   save_button.signal_connect("clicked") do
     errores_comentario = validar_comentario(comment_entry.text)
     if errores_comentario.empty?
@@ -197,20 +183,18 @@ def create_edit_window(id = nil)
       if validate_edited_fields(edited_fields)
         comment, edit_grid, id = limpiar_y_redefinir(comment_entry.text, edit_grid, id)
         empezar_reemplazo_de_datos(comment, edit_grid, id)
-      else
       end
     else
       mostrar_ventana_de_error(errores_comentario)
     end
   end
-  comment_entry.signal_connect("activate") do |widget|
+  comment_entry.signal_connect("activate") do |_widget|
     errores_comentario = validar_comentario(comment_entry.text)
     if errores_comentario.empty?
       edited_fields = collect_edited_fields(edit_grid, id)
       if validate_edited_fields(edited_fields)
         comment, edit_grid, id = limpiar_y_redefinir(comment_entry.text, edit_grid, id)
         empezar_reemplazo_de_datos(comment, edit_grid, id)
-      else
       end
     else
       mostrar_ventana_de_error(errores_comentario)

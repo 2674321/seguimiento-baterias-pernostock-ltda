@@ -6,9 +6,6 @@ require_relative 'edit_validation'
 require_relative 'edit_window_history_data_insert_module'
 require_relative 'edit_window_methods'
 module ValidationModule
-  def show_alert_dialog(message)
-    puts "ALERTA: #{message}"
-  end
   def validate_edited_fields(edited_fields)
     error_messages = []
     edited_fields.each do |column, value|
@@ -92,7 +89,6 @@ module ValidationModule
     else
       error_message = "Se encontraron los siguientes errores al validar los campos editados:\n#{error_messages.join("\n")}"
       MessageHelper.show_message_window(error_message)
-      show_alert_dialog(error_message)
       false
     end
   end

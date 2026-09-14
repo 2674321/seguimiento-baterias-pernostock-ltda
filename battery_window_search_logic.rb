@@ -24,6 +24,7 @@ def buscar_en_battery_window(column_index, search_text, battery_data, list_store
     show_message_window("Por favor, ingrese un término de búsqueda válido.")
     return
   end
+  return if battery_data.nil?
   Logica.incrementar_contador_busquedas_ventana_baterias
   Logica.incrementar_contador_busquedas
   matching_data = battery_data.select do |data|
