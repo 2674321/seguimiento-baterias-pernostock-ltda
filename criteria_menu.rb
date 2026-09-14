@@ -58,6 +58,23 @@ def create_criteria_menu(menu_button, main_box, window)
   calendario_button.signal_connect('clicked') do
     Calendario.show_calendar
   end
+  about_button = Gtk::Button.new(label: 'Acerca de')
+  about_button.set_tooltip_text('Información del sistema y autores')
+  menu_box.add(about_button)
+  about_button.signal_connect('clicked') do
+    dialog = Gtk::AboutDialog.new
+    dialog.transient_for = window
+    dialog.modal = true
+    dialog.program_name = 'Seguimiento de Baterías'
+    dialog.version = '1.0 (histórico, 2024)'
+    dialog.comments = 'Sistema de escritorio para seguimiento y gestión de baterías de PernoStock Ltda.'
+    dialog.website = 'https://github.com/2674321/seguimiento-baterias-pernostock-ltda'
+    dialog.website_label = 'Repositorio en GitHub'
+    dialog.authors = ['Patricio Varela C. (CA2OPX)']
+    dialog.license_type = Gtk::License::MIT_X11
+    dialog.set_logo_icon_name('seguimiento-baterias-pernostock')
+    dialog.present
+  end
   menu.add(menu_box)
   menu.set_relative_to(menu_button)
   menu_button.signal_connect('clicked') do
