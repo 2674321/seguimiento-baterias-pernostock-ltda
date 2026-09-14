@@ -8,7 +8,6 @@ require_relative 'interface_setup'
 module BatteryWindow
   def self.initialize_interface
     obtener_datos_baterias
-    @battery_window_open = false
     create_battery_window
   end
 end

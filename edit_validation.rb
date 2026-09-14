@@ -1,3 +1,5 @@
+require_relative 'message_helper'
+require_relative 'constants'
 def flexible_validator(value, allowed_values)
   normalized_value = value.to_s.downcase.strip.gsub(/\s+/, '')
   normalized_allowed_values = allowed_values.map { |v| v.downcase.strip.gsub(/\s+/, '') }

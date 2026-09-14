@@ -141,6 +141,27 @@ X11 de principal/edición/baterías/historial/estadísticas/registro/manual; flu
 edición completo (recuperar → reemplazar → historial → contadores → última operación);
 `invertir_orden`; sin *method redefined warnings* al cargar `main.rbw` con `-w`.
 
+## Tercera pasada (commit pendiente)
+
+- **Búsqueda por rango de fechas completamente rota** (`search_logic.rb`): `db.execute(query, start_date, end_date)` fallaba por el arity de `sqlite3` 2.x (igual que `reemplazo_de_datos`). Ahora `db.execute(query, [start_date, end_date])` + `ensure db.close` (antes fuga de conexión). Verificado con DB de prueba.
+- **`DateSearchValidators`**: `show_error_message` se invocaba desde un class-method donde no existe (`NoMethodError` ante fechas fuera de rango). Los validadores ahora son puros: levantan `ValidationError` y la ventana lo muestra.
+- `date_search_window.rb`: eliminado doble `destroy` en su propio handler; eliminado el falso parámetro `date_entry_box` (ya no se pasa).
+- `criteria_menu.rb`: eliminada la cadena fantasma `selected_criteria_box`/"Criterios seleccionados:" y `date_entry_box`/`start_date_entry` (box creado y nunca montado); `create_criteria_menu` ya no recibe `main_box` sin uso.
+- `menu_date_window.rb`: eliminado parámetro `date_button` sin usar.
+- `criteria_menu_validator.rb`: **eliminado** (huérfano, nadie lo requería; `dates_valid?` era idéntico a `dates_selected?`).
+- `battery_window_delete_db.rb` / `history_window_delete_db.rb`: eliminados arrays `deleted_battery_data`/`deleted_registro_data` (nunca usados) y branch vacíos; `ensure db.close`; retorno temprano sin selección.
+- `battery_window.rb` / `history_window.rb`: quitado `@battery_window_open`/`@history_window_open` seteados en módulo/clase equivocados (el estado real vive en el objeto top-level).
+- `history_window_interface.rb`: "Agregar a Favoritos" ahora llama a `agregar_a_favoritos_historial` (el helper propio del historial estaba muerto; usaba el de baterías).
+- `statistics_window.rb`: `ensure db.close` en `add_data_from_database`; eliminados `extend StatisticsData` inútil, `each` vacío y handler `destroy` vacío.
+- `edit_window_methods.rb` / `edit_save_button_methods.rb`: nueva `retrieve_for_save` (sin diálogos) para el guardado — antes el flujo de "Guardar cambios" re-ejecutaba la búsqueda y mostraba doble diálogo en el camino de error.
+- `backup_exit.rb`: el rescate de `backup_database` abría un diálogo GTK durante el cierre (riesgo similar al segfault corregido); ahora `warn` no gráfico.
+- `exportar_base_a_excel.rb`: eliminada `db_name` muerta; `ensure db.close`.
+- `show_loading_window.rb`: eliminada `message_index` muerta.
+- `battery_window_interface.rb`: eliminados handlers vacíos `clicked` y `row-activated`.
+- Requires de aislamiento añadidos: `statistics_data.rb`→statistics_logic, `edit_validation.rb`→message_helper/constants, `save_button_principal.rb`→utilities.
+
+Verificación: `ruby -c` en los 60 archivos; `ruby -w` de `main.rbw` sin warnings; render X11 de principal/edición/baterías/historial/estadísticas/registro/manual/fecha; búsqueda por rango real contra DB; `retrieve_for_save` probado para ID válido/inválido/inexistente.
+
 ## Pendiente/mejoras futuras (no bloqueantes)
 
 - Revisar mensajería de `backup_window_logic.rb` (`show_error_dialog`/

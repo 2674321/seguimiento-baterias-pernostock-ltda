@@ -8,7 +8,6 @@ def obtener_datos_baterias
   begin
     query = 'SELECT * FROM tabla_de_datos'
     result_set = db.execute(query)
-    db.close
     result_set.map do |data|
       [
         data[0],

@@ -68,7 +68,7 @@ def create_history_window
       menu.append(item_restablecer_pagina_historial)
       item_agregar_favoritos_historial = Gtk::MenuItem.new(label: "Agregar a Favoritos")
       item_agregar_favoritos_historial.signal_connect("activate") do
-        agregar_a_favoritos(tree_view, list_store)
+        agregar_a_favoritos_historial(tree_view, list_store)
       end
       menu.append(item_agregar_favoritos_historial)
       item_eliminar_interfaz_historial = Gtk::MenuItem.new(label: "Eliminar (Interfaz)")

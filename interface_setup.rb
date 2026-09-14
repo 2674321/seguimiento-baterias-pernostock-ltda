@@ -35,7 +35,7 @@ def create_interface(columns)
   column_combo.set_tooltip_text("Selecciona la columna para buscar\nFECHA_C = Fecha factura")
   menu_button = Gtk::Button.new
   menu_button.set_size_request(30, 30)
-  create_criteria_menu(menu_button, main_box, window)
+  create_criteria_menu(menu_button, window)
   battery_button = Gtk::Button.new
   battery_button.set_size_request(30, 30)
   battery_button.label = "Ventana Baterias"

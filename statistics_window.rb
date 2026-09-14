@@ -4,7 +4,6 @@ require_relative 'database_operations'
 require_relative 'statistics_logic'
 require_relative 'statistics_data'
 module Interfaz
-  extend StatisticsData
   def self.crear_segundo_treeview
     subtitle_label_2 = Gtk::Label.new('Estadísticas de las baterías en la base de datos')
     subtitle_label_2.halign = :start
@@ -38,7 +37,8 @@ module Interfaz
       iter.set_value(0, row[0].to_s.downcase)
       iter.set_value(1, row[1].to_s)
     end
-    db.close
+  ensure
+    db.close if db
   end
   def self.ventana_de_estadisticas
     begin
@@ -93,8 +93,6 @@ module Interfaz
       update_button.add(update_button_container)
       update_button.signal_connect('clicked') do
         StatisticsData.update_statistics_list(lista_estadisticas)
-        lista_estadisticas.each do |model, path, iter|
-        end
       end
       time_box.pack_start(update_button, expand: false, fill: false, padding: 5)
       box.pack_start(title_box, expand: false, fill: false, padding: 5)
@@ -102,8 +100,6 @@ module Interfaz
       box.pack_start(scrolled_window, expand: true, fill: true, padding: 0)
       box.pack_start(crear_segundo_treeview, expand: true, fill: true, padding: 0)
       statistics_window.add(box)
-      statistics_window.signal_connect('destroy') do
-      end
       statistics_window.show_all
     rescue StandardError => e
       e.backtrace.each { |line| puts line }

@@ -8,8 +8,7 @@ class DateSearchWindow
   include SearchLogic
   DATE_COLUMNS = ["Todas", "RECEPCION", "FECHA_C", "FECHA_NC", "FECHA_ENVIO"].freeze
 
-  def initialize(date_entry_box)
-    @date_entry_box = date_entry_box
+  def initialize
     @tree_view = Gtk::TreeView.new
     build_ui
   end
@@ -52,7 +51,6 @@ class DateSearchWindow
   end
   def build_ui
     @main_window = Gtk::Window.new('Búsqueda por Rango de Fechas')
-    @main_window.signal_connect('destroy') { @main_window.destroy }
     @main_window.set_default_size(400, 500)
     @main_window.set_position(Gtk::WindowPosition::CENTER)
     box = Gtk::Box.new(:vertical, 5)
