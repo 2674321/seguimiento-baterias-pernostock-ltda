@@ -30,16 +30,13 @@ def update_edit_grid_fields(edit_grid, battery_data)
 end
 def process_changed_fields(changed_fields, id, edit_grid, comment)
   begin
-   # puts" Inicio process_changed_fields, changed fields#{changed_fields},id#{id},edit_grid#{edit_grid},comment#{comment}"
     return if @search_operation
     return if @processing_changed_fields
     @processing_changed_fields = true
-    collect_edited_fields(edit_grid, id)
     if changed_fields.all? { |field_data| field_data[:original] == field_data[:new] }
       show_message("No se realizaron cambios")
     else
       display_changed_fields(changed_fields)
-      collect_original_data(id)
       replace_data_in_database(changed_fields, id, comment)
       clear_entry_fields(edit_grid)
     end
@@ -47,13 +44,6 @@ def process_changed_fields(changed_fields, id, edit_grid, comment)
     puts "Error al procesar campos cambiados: #{error.message}"
   ensure
     @processing_changed_fields = false
-  end
-end
-def collect_original_data(id)
-  begin
-    @original_field_values = retrieve_battery_data(id)
-  rescue StandardError => error
-    puts "Error al recuperar datos originales: #{error.message}"
   end
 end
 def display_changed_fields(changed_fields)

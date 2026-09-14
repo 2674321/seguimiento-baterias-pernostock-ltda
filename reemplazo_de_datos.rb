@@ -12,7 +12,6 @@ module REEMPLAZO_DE_DATOS
       db.execute(update_query, changed_fields.values + [id])
       db.commit
       Logica.incrementar_contador_ediciones
-      total_ediciones = Logica.obtener_total_ediciones
       ultima_operacion = "\n\nReemplazo de datos en la BATERIA CON ID: #{id}\nCampos editados: #{changed_fields.map { |key, value| "#{key}: #{value}" }.join(', ')}"
       UltimaOperacion.actualizar_ultima_operacion_realizada(ultima_operacion)
     rescue SQLite3::Exception => e

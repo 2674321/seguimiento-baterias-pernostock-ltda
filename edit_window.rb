@@ -8,10 +8,5 @@ require_relative 'edit_window_methods'
 require_relative 'edit_save_button_methods'
 require_relative 'edit_validation'
 require_relative 'edit_database_methods'
-@message_window = nil
 @current_edit_window = nil
 @history_window_open = false
-@edited_inputs = []
-def iniciar_ventana_de_edicion
-  create_edit_window
-end

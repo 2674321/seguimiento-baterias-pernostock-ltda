@@ -45,7 +45,10 @@ def backup_database_with_progress(backup_filename, progress_bar)
   Logica.incrementar_contador_copias_seguridad_manuales
 rescue StandardError => e
   UltimaOperacion.actualizar_ultima_operacion_realizada("Error al crear copia de seguridad: #{e.message}")
-  show_error_dialog(UltimaOperacion.obtener_ultima_operacion_realizada)
+  GLib::Idle.add do
+    show_error_dialog(UltimaOperacion.obtener_ultima_operacion_realizada)
+    false
+  end
 ensure
   db.close if db
 end

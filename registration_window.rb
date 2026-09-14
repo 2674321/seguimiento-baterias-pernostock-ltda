@@ -113,7 +113,8 @@ registration_window.show_all
 end
 def on_save_button_clicked(column_entries, comment_entry)
   required_fields = ["MODELO", "SERIE", "RECEPCION", "CLIENTE", "VENDEDOR"]
-  if column_entries.values.uniq.length == 1 && !column_entries.values.uniq[0].empty?
+  entry_texts = column_entries.values.map(&:text)
+  if entry_texts.uniq.length == 1 && !entry_texts.uniq[0].empty?
     show_message("Todos los campos contienen los mismos datos. Por favor, verifica.")
     return
   end

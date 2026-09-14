@@ -61,7 +61,7 @@ def create_backup_window_with_progress
       filename = dialog.filename
       destination_file = File.join(absolute_path, 'base_de_datos.db')
       FileUtils.cp(filename, destination_file, preserve: true)
-      show_error_dialog("Base de datos reemplazada con éxito.")
+      show_info_dialog("Base de datos reemplazada con éxito.")
     end
     dialog.destroy
   end

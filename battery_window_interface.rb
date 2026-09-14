@@ -164,8 +164,8 @@ def create_battery_window
     buscar_en_battery_window(column_index, search_text, battery_data, list_store)
     @linea_divisoria_agregada = false
   end
-  update_time_label(time_label)
-  @timeout_id = GLib::Timeout.add_seconds(1) { update_time_label(time_label); true }
+  update_battery_time_label(time_label)
+  @timeout_id = GLib::Timeout.add_seconds(1) { update_battery_time_label(time_label); true }
   battery_window.set_position(Gtk::WindowPosition::CENTER_ALWAYS)
   @battery_window_open = true
   battery_window.show_all
@@ -173,7 +173,7 @@ end
 def editar_baterias(id)
   create_edit_window(id)
 end
-def update_time_label(label)
+def update_battery_time_label(label)
   return unless label && !label.destroyed?
   begin
     label.text = Time.now.strftime("%Y-%m-%d %H:%M:%S")

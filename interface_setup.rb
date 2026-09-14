@@ -73,14 +73,11 @@ def create_interface(columns)
   edit_button.signal_connect('clicked') do
     create_edit_window
   end
-  resultados_guardados = false
-
   entry_serie.signal_connect('activate') do
     search_buttons[0].clicked
   end
   search_buttons[0].signal_connect('clicked') do
     valor = entry_serie.text.strip
-    column_text = column_combo.active_text
     index = column_combo.active
 
     if index.nil? || valor.empty?
