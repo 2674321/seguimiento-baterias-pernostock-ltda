@@ -4,6 +4,9 @@ require_relative 'dialog_helper'
 def show_message_dialog(title, message)
   DialogHelper.show_info(title, message)
 end
+def set_button_icon(button, icon_name)
+  button.image = Gtk::Image.new(icon_name: icon_name, icon_size: Gtk::IconSize::BUTTON)
+end
 def update_time_label(label)
   return unless label && !label.destroyed?
   begin

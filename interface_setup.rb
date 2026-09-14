@@ -23,9 +23,21 @@ def create_interface(columns)
   @_config_copia_seguridad = configuracion
   window = Gtk::Window.new('Ventana principal de búsqueda')
   window.set_position(Gtk::WindowPosition::CENTER)
-  window.set_size_request(400, 450)
+  window.set_size_request(560, 520)
   main_box = Gtk::Box.new(:vertical, 5)
   window.add(main_box)
+  header_box = Gtk::Box.new(:vertical, 2)
+  header_box.set_border_width(10)
+  title_label = Gtk::Label.new('Seguimiento de Baterías · PernoStock Ltda.')
+  title_label.name = 'brand'
+  title_label.set_line_wrap(true)
+  title_label.halign = :center
+  subtitle_label = Gtk::Label.new('Consulta, registro, edición, copias de seguridad y estadísticas de baterías.')
+  subtitle_label.name = 'hint'
+  subtitle_label.halign = :center
+  header_box.pack_start(title_label, expand: false, fill: false, padding: 2)
+  header_box.pack_start(subtitle_label, expand: false, fill: false, padding: 2)
+  main_box.pack_start(header_box, expand: false, fill: true, padding: 2)
   search_box = Gtk::Box.new(:horizontal, 5)
   main_box.pack_start(search_box, expand: false, fill: true, padding: 5)
   entry_serie = Gtk::Entry.new
@@ -55,18 +67,21 @@ def create_interface(columns)
   scroll.add(result_label)
   buttons_box = Gtk::Box.new(:horizontal, 5)
   search_buttons = ['Buscar', 'Guardar'].map { |label| Gtk::Button.new(label: label) }
+  set_button_icon(search_buttons[0], 'system-search')
+  set_button_icon(search_buttons[1], 'document-save')
   search_buttons[0].set_tooltip_text('Haz clic aquí para hacer consultas en la base de datos.')
   search_buttons[1].set_tooltip_text('Haz clic aquí para guardar los resultados de las consultas.')
   backup_button = Gtk::Button.new(label: 'Copia de Seguridad')
+  set_button_icon(backup_button, 'document-save')
   backup_button.set_tooltip_text('La ventana de copias de seguridad.')
   backup_button.signal_connect('clicked') do
     create_backup_window_with_progress
   end
   edit_button = Gtk::Button.new(label: 'Edición')
+  set_button_icon(edit_button, 'accessories-text-editor')
   edit_button.set_tooltip_text('Haz clic aquí para abrir la ventana de edición de baterías.')
   exit_button = Gtk::Button.new(label: 'Salir')
-  exit_icon = Gtk::Image.new(icon_name: "application-exit", icon_size: Gtk::IconSize::BUTTON)
-  exit_button.set_image(exit_icon)
+  exit_button.image = Gtk::Image.new(icon_name: "application-exit", icon_size: Gtk::IconSize::BUTTON)
   exit_button.set_tooltip_text('Cierra el programa.')
   result_box.pack_start(scroll, expand: true, fill: true, padding: 5)
   result_box.pack_start(buttons_box, expand: false, fill: true, padding: 5)
@@ -101,6 +116,7 @@ def create_interface(columns)
     end
   end
   registration_button = Gtk::Button.new(label: 'Registro Bat.')
+  set_button_icon(registration_button, 'list-add')
   registration_button.set_tooltip_text('Haz clic aquí para abrir la ventana de Registro de baterías.')
   registration_button.signal_connect('clicked') { create_registration_window(window) }
   buttons_box.pack_start(exit_button, expand: true, fill: true, padding: 5)

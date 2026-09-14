@@ -203,6 +203,45 @@ Reforma estructural con verificación integral (`ruby -c`, `ruby -w` sin warning
 - Requires redundantes retirados: `statistics_data` (battery_window_search_logic), `statistics_window` e `interface_setup` (battery_window), `edit_save_button_methods`, `edit_window_methods` y `statistics_logic` (validacion_inputs_edit).
 - `@edited_fields` era un ivar persistente en `collect_edited_fields` → variable local.
 
+## Sexta pasada — mejora visual y corrección de ventana de carga (commit pendiente)
+
+Reforma visual y corrección del flujo de arranque, verificada con tests automatizados y capturas de pantalla de las ventanas.
+
+**Ventana de carga: bug crítico corregido**
+- **Causa raíz** (`main.rbw`): la ventana de carga se creaba y se destruía ANTES de que `Gtk.main` iniciara el loop, por lo que nunca llegaba a pintarse. Ahora el init corre dentro de `GLib::Idle` tras mostrar la ventana, y la ventana se destruye en el `ensure` de ese callback.
+- La ventana de carga ahora es funcional: se muestra durante la inicialización y se destruye automáticamente cuando la interfaz principal está lista.
+
+**Mejora visual: tema claro y limpio (GtkCssProvider global)**
+- Nuevo `app_theme.rb` con módulo `AppTheme` que instala un proveedor CSS global vía `Gtk::StyleContext.add_provider_for_screen`. CSS centrado en:
+  - Fondo blanco/gris muy claro (`#f7f9fc`), bordes sutiles (`#cfd8e3`).
+  - Botones con fondo blanco, bordes redondeados, hover/active states suaves.
+  - Entradas con bordes redondeados y focus azul (`#2a7ab0`).
+  - Treeviews con header gris y selección azul.
+  - Progressbar con accent azul.
+  - Tipografías específicas para marcas y subtítulos (`#brand`, `#title`, `#hint`).
+- Se instala en `main.rbw` y `show_loading_window.rb` antes de crear cualquier ventana.
+
+**Ventana de carga rediseñada**
+- Marca: `Seguimiento de Baterías · PernoStock Ltda.` con estilo `#brand` (azul, bold, grande).
+- Subtítulo: `Iniciando la aplicación…` estilo `#hint`.
+- Icono de la app (icon_name: `seguimiento-baterias-pernostock`).
+- Spinner animado.
+- Mensajes rotativos (lista `MESSAGES`) cada 1.5s.
+- Barra de progreso animada (`GLib::Timeout` cada 50ms, incremento de 0.01).
+- Duración configurable como parámetro `duration`.
+- Limpieza de timers con `begin/rescue` para evitar warnings de GLib.
+
+**Ventana principal mejorada**
+- Header con `#brand` (nombre de la app) y `#hint` (subtítulo) centrados.
+- Iconos en todos los botones de acción: `system-search` (Buscar), `document-save` (Guardar), `document-save` (Copia de Seguridad), `accessories-text-editor` (Edición), `list-add` (Registro Bat.), `application-exit` (Salir).
+- Helper `set_button_icon` añadido a `utilities.rb`.
+
+**Base de datos de prueba (local)**
+- Script `_scripts/dev/reset_db_prueba.rb`: crea `base_de_datos.db` (gitignored) con 7 filas de ejemplo para testing local.
+- Ejecutado: `base_de_datos.db` regenerada con 7 filas (modelo serie cliente vendedor recarga destino etc.).
+
+Verificación: `ruby -c` en todos los archivos; flujo de arranque completo con loading → main (ventana de carga efectivamente se pinta y se destruye al finalizar init); render X11 de las 8 ventanas con tema aplicado; app real lanzada sin errores; capturas de pantalla de loading y ventana principal verificadas; test de timeout de duración de la ventana de carga. 
+
 ## Pendiente/mejoras futuras (no bloqueantes)
 
 **Código duplicado restante (bajo riesgo, valor moderado)**
