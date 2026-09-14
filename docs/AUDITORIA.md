@@ -411,6 +411,23 @@ Verificación: `ruby -c` OK en `interface_setup.rb`, `registration_window.rb`, `
 
 > Nota: si el icono del lanzador no se refresca al instante, reiniciar el panel/menú de la sesión de escritorio (Caja/Mint-Menu refrescan su propio cache).
 
+## Duodécima pasada — Acerca de completo + Manual de uso detallado
+
+**`criteria_menu.rb` ("Acerca de")**
+- El `Gtk::AboutDialog` pasa de ser mínimo a completo: versión `1.0.1`, `copyright` (© 2023–2024 CA2OPX + mención de la recuperación/auditoría 2026), descripción extendida con las ventanas que integra la app, `authors`/`documenters`/`artists`, texto completo de la licencia MIT con `wrap_license`, website del repositorio y logo de la app.
+- Verificado que todas las propiedades usadas existen en la gem gtk3 (`documenters=`, `artists=`, `license=`, `wrap_license=`).
+
+**`user_manual.rb` (reestructurado y ampliado)**
+- **Navegación por índice robusta:** se eliminaron los desplazamientos duros del antiguo `case` (valores absolutos que se desincronizan al editar contenido). Ahora cada sección del índice es un ancla `#nombre`, y en `activate-link` el offset se calcula en tiempo real con `label.text.rindex(aguja)` + `label.layout.index_to_pos` (`y / 1024`), con clamp a `upper - page_size`. Funciona aunque se cambie el tamaño de la ventana y el texto se reajuste.
+- **Contenido reescrito en 16 secciones** indexadas: Introducción; Funcionalidades principales; Uso del programa (ventana principal, con las 3 zonas + botones y selector de columnas); Tabla de baterías y menú contextual (15 columnas + 6 opciones); Buscadores; Rango de fechas (columnas Todas/RECEPCION/FECHA_C/FECHA_NC/FECHA_ENVIO); Ventana de edición (estados permitidos de MOTIVO y RECARGA); Registro de baterías (obligatorios, PENDIENTE, estados, NC=0 por defecto); Historial de cambios (7 campos + menú contextual + búsqueda rápida de ID); Estadísticas (8 columnas correspondientes a `statistics_window.rb` + tabla Modelo/Cant.); Calendario; Copia de seguridad (manual/automática/temporizada + cargar); Configuración de copias (6 intervalos); Importar/Exportar (Excel + CSV/.db); Atajos de teclado; Reporte de errores y contacto.
+- El encabezado indica versión 1.0.1 y la pie firma "02 de febrero de 2024 (recuperado y auditado en 2026)".
+- Detalle: el carácter `&` en "drag & drop" se escapó como `&amp;` (Pango requiere la entidad, si no `set_markup` falla y la etiqueta queda vacía).
+
+**Verificación**
+- `ruby -c` OK en `user_manual.rb` y `criteria_menu.rb`.
+- Test `test_manual.rb`: los 16 anclajes se encuentran (`rindex`), los offsets son monótonamente crecientes y dentro de la altura del label; el último requiere clamp (se aplica). `test_merge_smoke.rb` RESULT=PASS.
+- App real (X11): arranca sin errores de markup ni Gtk-CRITICAL; `Gtk::AboutDialog` con todas las propiedades nuevas se presenta sin excepciones.
+
 ## Pendiente/mejoras futuras (no bloqueantes)
 
 **Código duplicado restante (bajo riesgo, valor moderado)**
