@@ -1,6 +1,6 @@
 # Regenera base_de_datos.db (SOLO local: el archivo está en .gitignore y nunca
 # se sube a git) con datos de ejemplo para probar la interfaz.
-Dir.chdir(File.expand_path('../../..', __dir__))
+Dir.chdir(File.expand_path('../..', __dir__))
 require 'gtk3'
 require 'fileutils'
 require_relative '../../database_operations'
