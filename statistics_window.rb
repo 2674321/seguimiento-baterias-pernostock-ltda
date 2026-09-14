@@ -1,6 +1,7 @@
 require 'gtk3'
 require 'sqlite3'
 require_relative 'database_operations'
+require_relative 'utilities'
 require_relative 'statistics_logic'
 require_relative 'statistics_data'
 module Interfaz
@@ -29,7 +30,7 @@ module Interfaz
     return box_2
   end
   def self.add_data_from_database(lista_estadisticas_2)
-    db = SQLite3::Database.new 'base_de_datos.db'
+    db = SQLite3::Database.new NOMBRE_DB
     query = "SELECT MODELO, COUNT(*) AS Cantidad FROM tabla_de_datos GROUP BY MODELO"
     results = db.execute(query)
     results.each do |row|
@@ -73,14 +74,9 @@ module Interfaz
       time_label.halign = :end
       time_label.valign = :start
       time_label.margin_right = 10
-      update_time_label = lambda do
-        return unless time_label && !time_label.destroyed?
-        current_time = Time.now
-        formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
-        time_label.text = "#{formatted_time}"
-      end
-      update_time_label.call
-      GLib::Timeout.add_seconds(1) { update_time_label.call; true }
+      update_time_label(time_label)
+      timeout_id = GLib::Timeout.add_seconds(1) { update_time_label(time_label); true }
+      statistics_window.signal_connect('destroy') { GLib::Source.remove(timeout_id) if timeout_id }
       time_box = Gtk::Box.new(:horizontal, 10)
       time_box.pack_end(time_label, expand: false, fill: false, padding: 5)
       update_button = Gtk::Button.new

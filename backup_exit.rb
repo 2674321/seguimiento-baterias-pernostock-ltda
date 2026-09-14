@@ -50,11 +50,5 @@ module BackupAndExit
   rescue ArgumentError
     stored_counter || "0"
   end
-  # Operación de backup de cierre (antes abría una ventana GTK + `Gtk.main`
-  # durante la salida, lo que provocaba un segundo loop y un segfault).
-  # Ahora es simplemente una operación no gráfica.
-  def self.backup_exit
-    run_automatic_backup
-  end
 end
 Logica.actualizar_ultimo_respaldo_automatico(BackupAndExit.load_counter_from_file)

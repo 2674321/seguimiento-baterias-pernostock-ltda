@@ -1,7 +1,6 @@
 require 'gtk3'
 require_relative 'message_helper'
 require_relative 'statistics_logic'
-require_relative 'statistics_data'
 NOMBRES_BATTERY_WINDOW_STAT = {
   ID: 'ID Bateria',
   MODELO: 'Modelo',

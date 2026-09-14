@@ -7,7 +7,7 @@ module Calendario
     window.set_border_width(10)
     calendar = Gtk::Calendar.new
     window.add(calendar)
-    window.set_window_position(Gtk::WindowPosition::CENTER)
+    window.set_position(Gtk::WindowPosition::CENTER)
     window.show_all
     window
   end

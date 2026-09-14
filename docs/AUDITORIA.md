@@ -177,10 +177,48 @@ Hallazgos por auditoría empírica (`ruby -w`, grep, arity verificada contra sql
 
 Verificación: `ruby -c` en los 60 archivos; `ruby -w` de `main.rbw` **sin ningún warning** (antes había method-redefined); render X11 de todas las ventanas; app real lanzada con el script (Gtk.main corriendo, sin errores); flujo de edición/reemplazo contra DB real.
 
+## Quinta pasada — gran reforma de mejoras (commit pendiente)
+
+Reforma estructural con verificación integral (`ruby -c`, `ruby -w` sin warnings, render X11 de todas las ventanas, app real lanzada sin errores).
+
+**Bugs de runtime corregidos**
+- `Gtk::Window#set_window_position` **no existe** en GTK3 (NoMethodError garantizado) → `set_position` en `show_loading_window.rb` y `calendario.rb`.
+- `menu.popup(nil, nil, ...)` deprecado en GTK 3.22 → `menu.popup_at_pointer(event)` en `battery_window_interface.rb`, `history_window_interface.rb` y `date_search_window.rb`.
+- Fuga de conexión SQLite en `edit_database_methods.rb` (db.close fuera de ensure; execute fallido dejaba la conexión abierta) → `ensure db.close`.
+- Fuga de conexión en el callback de búsqueda de `interface_setup.rb` (una conexión nueva por clic en "Buscar") → `ensure database.close`.
+- `statistics_window.rb` usaba `'base_de_datos.db'` hardcodeado → `NOMBRE_DB`.
+
+**Fugas de recursos (timers GLib nunca cancelados)**
+- `registration_window.rb` y `statistics_window.rb`: el timeout de 1s seguía despertando indefinidamente tras cerrar la ventana → se guarda el id y se cancela en `signal_connect('destroy')`.
+- `show_loading_window.rb`: el timer de 2s del spinner se autocancela al destruir la ventana y se cancela explícitamente al terminar la carga.
+
+**Unificación de lógica duplicada**
+- **Diálogos**: 8 helpers equivalentes en 5 archivos (`show_message_dialog`, `show_message_window`, `show_message`, `show_error_dialog`, `show_info_dialog`, `show_confirmation_dialog`, `mostrar_ventana_de_error`, `show_validation_message`) → ahora un único `DialogHelper` (`dialog_helper.rb`) con `show_dialog/show_info/show_error/show_warning/show_confirmation`; los helpers globales quedan como delegados de 1 línea (API pública intacta).
+- **Reloj**: 3 versiones de `update_time_label` (registro / baterías con rescue / lambda en estadísticas) → una sola robusta en `utilities.rb`.
+- **Validadores**: 12+ reimplementaciones por columna → módulo puro `FieldValidators` (`field_validators.rb`), con constantes centralizadas (`MOTIVO_STATES`, `RECARGA_STATES`, `MIN_YEAR..MAX_YEAR`, `MAX_COMMENT_LENGTH`). `registration_window_validators.rb` y `validacion_inputs_edit.rb` delegan a él; comportamiento por campo preservado al pie de la letra (incl. divergencias por flujo: NC/letras-espacios en edición vs Float/Integer en registro). `require 'date'` explícito (antes dependencia frágil vía statistics_logic).
+- **Base de datos**: única `setup_database` global; eliminado `DatabaseOperations.setup_database` duplicado (el módulo ahora usa el global).
+
+**Limpieza (dead code)**
+- Eliminadas defs sin llamadores: `backup_database` global (`backup_window.rb`), `BackupAndExit.backup_exit`, `MessageHelper.close_window`, `MAX_LONGITUD_GENERAL`.
+- Requires redundantes retirados: `statistics_data` (battery_window_search_logic), `statistics_window` e `interface_setup` (battery_window), `edit_save_button_methods`, `edit_window_methods` y `statistics_logic` (validacion_inputs_edit).
+- `@edited_fields` era un ivar persistente en `collect_edited_fields` → variable local.
+
 ## Pendiente/mejoras futuras (no bloqueantes)
 
-- Revisar mensajería de `backup_window_logic.rb` (`show_error_dialog`/
-  `show_confirmation_dialog`) frente al helper consolidado.
-- Portar `menu_date_window.rb`/`criteria_menu.rb` a clases con estado (callbacks
-  globales funcionan, pero son frágiles ante redefiniciones).
-- Evaluar migrar la interfaz a un DSL tipo `Adwaita` si se busca modernización.
+**Código duplicado restante (bajo riesgo, valor moderado)**
+- Acciones de menú contextual gemelas (battery vs history) — `agregar_a_favoritos`, `eliminar_seleccion_interfaz`, `eliminar_seleccion_bd`, `restablecer_pagina` — funciones prácticamente idénticas con distintos nombres. Podrían consolidarse en un módulo `TreeViewActions`, aunque el flag `@linea_divisoria_agregada` comparte estado entre ventanas.
+- 4 misiones de nombres-legibles manuales (`NOMBRES_CAMPOS`, `NOMBRES_BATTERY_WINDOW_STAT`, `label_text`/`set_entry_tooltip`, `HistoryData.format_results`, `create_edit_window`): un cambio de nombre de columna requiere actualizar todos. Podrían derivarse de `Constants::TablaDeDatos::COLUMN_NAMES`.
+
+**Recurso: copia temporizada sin transacción**
+- `configuracion_cop_seg.rb` usa solo `FileUtils.cp` sin `BEGIN IMMEDIATE` / `ROLLBACK` como hacen las demás copias. Si SQLite escribe simultáneamente, la copia podría ser inconsistente.
+
+**Recurso: hilo de copia temporizada sin `join`**
+- `configuracion_cop_seg.rb` ejecuta `Thread.new` para el bucle infinito; `stop_backup_logic` hace `join(1)`, pero el hilo puede estar durmiendo. Se resolvería con `Thread.new { ...; Thread.current.report_on_exception = false }.daemon = true` o bien usando `sleep 1` entre chequeos de `@stop_backup`.
+
+**Requerimientos frágiles**
+- `statistics_window.rb` requiere explícitamente `utilities` para `update_time_label` (añadido en la quinta pasada). Si se carga en aislamiento sin `main.rbw`, podrían faltarse otros (`database_operations` / `statistics_logic`); una carga estricta (autoload o bundler) eliminaría esto.
+
+**Oportunidades de modernización**
+- Evaluar migración a `Gtk4` / `Adwaita` en el futuro (APIs de diálogos cambian: `Gtk::Dialog` eliminado en GTK4).
+- `configuracion_cop_seg.rb` podría emitir evento `GLib::Idle` de progreso en el hilo de copia temporizada (actualmente solo avisa al cerrar).
+- `ExportToExcel` usa `Workbook` de `write_xlsx`; alternativa con `odf` o `csv` con manejo básico de errores más robusto.

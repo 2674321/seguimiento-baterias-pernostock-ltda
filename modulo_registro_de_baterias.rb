@@ -1,10 +1,8 @@
 require 'sqlite3'
 require_relative 'constants'
 require_relative 'statistics_logic'
+require_relative 'database_operations'
 module DatabaseOperations
-  def self.setup_database
-    SQLite3::Database.new(NOMBRE_DB)
-  end
   def self.insertar_datos(datos)
     db = setup_database
     begin

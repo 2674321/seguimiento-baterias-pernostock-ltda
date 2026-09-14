@@ -93,7 +93,8 @@ def create_registration_window(parent)
   time_label.valign = :start
   time_label.margin_right = 10
   update_time_label(time_label)
-  GLib::Timeout.add_seconds(1) { update_time_label(time_label); true }
+  timeout_id = GLib::Timeout.add_seconds(1) { update_time_label(time_label); true }
+  registration_window.signal_connect('destroy') { GLib::Source.remove(timeout_id) if timeout_id }
   time_box = Gtk::Box.new(:horizontal, 10)
   time_box.pack_end(time_label, expand: false, fill: false, padding: 5)
   registration_box.pack_end(time_box, expand: false, fill: false, padding: 5)
@@ -162,10 +163,6 @@ end
 def clear_fields(column_entries, comment_entry)
   column_entries.values.each { |entry| entry.text = '' }
   comment_entry.text = ''
-end
-def update_time_label(label)
-  return unless label && !label.destroyed?
-  label.text = Time.now.strftime("%Y-%m-%d %H:%M:%S")
 end
 def registrar_datos_ventana_registro(datos_a_insertar)
   DatabaseOperations.insertar_datos(datos_a_insertar)
