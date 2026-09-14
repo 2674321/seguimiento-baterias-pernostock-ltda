@@ -152,11 +152,5 @@ def create_interface(columns)
     BackupAndExit.run_automatic_backup
     Gtk.main_quit
   end
-  window.show_all
-  revealer.reveal_child = false
-  GLib::Idle.add do
-    revealer.reveal_child = true
-    false
-  end
   window
 end
