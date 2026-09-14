@@ -31,7 +31,7 @@ def insert_initial_data_if_needed
           loading_window.destroy
         end
         if main_window && !main_window.destroyed?
-          main_window.visible = true
+          main_window.show_all
           main_window.child.reveal_child = false
           GLib::Timeout.add(80) do
             main_window.child.reveal_child = true

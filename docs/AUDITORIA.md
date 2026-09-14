@@ -259,7 +259,8 @@ Rechazo del CSS del tema claro forzado (`app_theme.rb`) — el usuario indicó q
 
 **Corrección del orden de las ventanas (bug detectado tras la séptima pasada)**
 - **Causa raíz**: `create_interface` llamaba `window.show_all` al final, así que la ventana principal se hacía visible de inmediato mientras la de carga aún estaba en pantalla → la UI principal se superponía sobre la carga.
-- **Resolución**: la ventana principal se construye ahora **oculta** (`create_interface` ya no hace `show_all`; `main.rbw` la oculta con `visible = false`) y solo se muestra **después** de destruir la ventana de carga (`main_window.visible = true`), con el fade-in del `Gtk::Revealer` disparado vía `GLib::Timeout` (80ms) en lugar de `GLib::Idle`.
+- **Resolución**: la ventana principal se construye ahora **oculta** (`create_interface` ya no hace `show_all`; `main.rbw` la mantiene `visible = false`) y solo se muestra **después** de destruir la ventana de carga, con el fade-in del `Gtk::Revealer` disparado vía `GLib::Timeout` (80ms) en lugar de `GLib::Idle`.
+- **Corrección posterior (UI vacía)**: `window.visible = true` solo mostraba el marco de la ventana, no su árbol de widgets (que nunca recibieron `show_all`), dejando la UI completamente vacía y con tamaño colapsado. Se sustituyó por `main_window.show_all` (marca `visible=true` en toda la jerarquía) manteniendo `reveal_child=false` inicial para el fade-in del `Revealer`.
 - **Nota**: `GLib::Idle.add` no se dispara de forma fiable en este entorno ruby-gtk3 cuando se agenda desde un callback de `GLib::Timeout` (sí lo hace desde señales GTK como `realize`). Por eso el fade-in usa `GLib::Timeout` corto.
 
 **Eliminación del tema de colores forzado**
