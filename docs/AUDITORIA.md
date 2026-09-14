@@ -162,7 +162,7 @@ edición completo (recuperar → reemplazar → historial → contadores → úl
 
 Verificación: `ruby -c` en los 60 archivos; `ruby -w` de `main.rbw` sin warnings; render X11 de principal/edición/baterías/historial/estadísticas/registro/manual/fecha; búsqueda por rango real contra DB; `retrieve_for_save` probado para ID válido/inválido/inexistente.
 
-## Cuarta pasada (commit pendiente)
+## Cuarta pasada (commit `f53a06e`)
 
 Hallazgos por auditoría empírica (`ruby -w`, grep, arity verificada contra sqlite3 2.9.6):
 
@@ -177,7 +177,7 @@ Hallazgos por auditoría empírica (`ruby -w`, grep, arity verificada contra sql
 
 Verificación: `ruby -c` en los 60 archivos; `ruby -w` de `main.rbw` **sin ningún warning** (antes había method-redefined); render X11 de todas las ventanas; app real lanzada con el script (Gtk.main corriendo, sin errores); flujo de edición/reemplazo contra DB real.
 
-## Quinta pasada — gran reforma de mejoras (commit pendiente)
+## Quinta pasada — gran reforma de mejoras (commit `c53d8cc`)
 
 Reforma estructural con verificación integral (`ruby -c`, `ruby -w` sin warnings, render X11 de todas las ventanas, app real lanzada sin errores).
 
@@ -203,7 +203,7 @@ Reforma estructural con verificación integral (`ruby -c`, `ruby -w` sin warning
 - Requires redundantes retirados: `statistics_data` (battery_window_search_logic), `statistics_window` e `interface_setup` (battery_window), `edit_save_button_methods`, `edit_window_methods` y `statistics_logic` (validacion_inputs_edit).
 - `@edited_fields` era un ivar persistente en `collect_edited_fields` → variable local.
 
-## Sexta pasada — mejora visual y corrección de ventana de carga (commit pendiente)
+## Sexta pasada — mejora visual y corrección de ventana de carga (commit `2e5863c`, fix adicional `a85ea21`)
 
 Reforma visual y corrección del flujo de arranque, verificada con tests automatizados y capturas de pantalla de las ventanas.
 
@@ -248,6 +248,33 @@ Reforma visual y corrección del flujo de arranque, verificada con tests automat
 - `configurar_base_de_datos` preserva datos existentes (`CREATE TABLE IF NOT EXISTS` + retorno temprano si la tabla ya existe), así que lanzar la app no borra el seed.
 
 Verificación: `ruby -c` en todos los archivos; flujo de arranque completo con loading → main (ventana de carga efectivamente se pinta y se destruye al finalizar init); render X11 de las 8 ventanas con tema aplicado; app real lanzada sin errores; capturas de pantalla de loading y ventana principal verificadas; test de timeout de duración de la ventana de carga; DB semilla persistente al lanzar la app (EXIT=124 timeout esperado). 
+
+## Séptima pasada — rechazo de tema de colores + nueva dirección visual (pendiente)
+
+Rechazo del CSS del tema claro forzado (`app_theme.rb`) — el usuario indicó que el blanco interfería con el tema del sistema (modo oscuro). Se eliminó `app_theme.rb` y todas las llamadas a `AppTheme.install`, devolviendo la app al tema GTK nativo del sistema (respetando el dark mode). Manteniendo el color de los botones ya que el usuario los encontraba cómodos visualmente.
+
+**Corrección de la ventana de carga (bug real)**
+- **Causa raíz**: en `main.rbw` anterior, `GLib::Idle.add` ejecutaba `create_interface` de forma síncrona **antes** de que la ventana de carga pudiera pintarse (GTK no procesa eventos de dibujo hasta que `Gtk.main` ejecuta iteraciones del loop). La ventana se creaba y se destruía instantáneamente, sin que el usuario jamás la viera.
+- **Resolución**: init ahora corre vía `GLib::Timeout.add(400)` (400ms tras Gtk.main, dando tiempo a GTK para pintar la ventana), y destrucción garantizada tras mínimo 2.5s en pantalla. Durante el init (~2.7s), la ventana de carga permanece visible (congelada al estar el loop bloqueado). Al finalizar, se fuerza un mínimo adicional de display para que se perciba como una pantalla de carga real.
+
+**Eliminación del tema de colores forzado**
+- `app_theme.rb` eliminado (git rm). Se eliminaron todas las llamadas a `AppTheme.install` en `main.rbw` y `show_loading_window.rb`.
+- Los label con name `brand`/`hint` y la clase `splash` fueron removidos; los widgets usan ahora los estilos GTK nativos del sistema (dark mode respectado).
+
+**Nueva dirección visual: estructura y animaciones (no colores)**
+- **Ventana principal: layout estructurado**
+  - Árbol de búsqueda reemplazado por `Gtk::Grid` alineado con `column_spacing` uniforme.
+  - `entry_serie` con `hexpand=true` para ocupar ancho disponible.
+  - Botones de acción reagrupados en `Gtk::ButtonBox` con `layout = EXPAND` (distribución uniforme).
+  - Contenido principal envuelto en `Gtk::Revealer` (transition_type: `CROSSFADE`, duration: 600ms) — **fade-in** al mostrar la ventana principal.
+  - Ventana tamaño `640×560`.
+  - `result_label.selectable = true`.
+- **Ventana de carga: indicador de porcentaje**
+  - Nuevo `percent_label` en la misma línea que los mensajes rotativos, que muestra `0%` → `99%` con el avance del progressbar.
+  - Ventana `resizable=false`, tamaño `420×260`.
+  - Timer de auto-destrucción eliminado; el caller (`main.rbw`) es responsable de destruir la ventana con duración mínima garantizada.
+
+Verificación: `ruby -c` todos los archivos; advertencias preexistentes (`user_manual.rb`, `write_xlsx`, requires circulares) sin cambios. Smoke headless: `show_loading_window` → ventana visible a 500ms, destroy vía timeout OK; `create_interface` → ventana principal visible, Revealer idle-triggered, destroy limpio sin GLib-CRITICAL. App real: loading y main capturados (PNG válidos); DB preservada (7 filas); sin nuevos warnings.
 
 ## Pendiente/mejoras futuras (no bloqueantes)
 
