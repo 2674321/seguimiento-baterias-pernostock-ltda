@@ -43,17 +43,28 @@ def create_criteria_menu(menu_button, window)
     manual_window = ManualWindow.new(menu_button)
     manual_window.show
   end, expand: false, fill: true, padding: 0)
-  menu_box.pack_start(build_item.call('Acerca de', 'help-about', 'Información del sistema y autores') do
+  menu_box.pack_start(build_item.call('Acerca de', 'help-about', 'Información del sistema, autores y licencia') do
     dialog = Gtk::AboutDialog.new
     dialog.transient_for = window
     dialog.modal = true
     dialog.program_name = 'Seguimiento de Baterías'
-    dialog.version = '1.0 (histórico, 2024)'
-    dialog.comments = 'Sistema de escritorio para seguimiento y gestión de baterías de PernoStock Ltda.'
+    dialog.version = '1.0.1'
+    dialog.copyright = "© 2023–2024 Patricio Varela C. (CA2OPX)\nPernoStock Ltda. · Proyecto recuperado y auditado en 2026"
+    dialog.comments = "Sistema de escritorio para consulta, registro, edición, copias de seguridad y estadísticas de baterías de PernoStock Ltda.\n\n" \
+                      "La aplicación dispone de una única ventana principal con la tabla completa de baterías (15 columnas), buscador por columnas, " \
+                      "menú contextual, ventana de registro, ventana de edición, historial de cambios, estadísticas de uso, rango de fechas, calendario " \
+                      "e importación/exportación de la base de datos. Copia de seguridad automática al cerrar y copias temporizadas configurables."
     dialog.website = 'https://github.com/2674321/seguimiento-baterias-pernostock-ltda'
     dialog.website_label = 'Repositorio en GitHub'
-    dialog.authors = ['Patricio Varela C. (CA2OPX)']
-    dialog.license_type = Gtk::License::MIT_X11
+    dialog.authors = ['Patricio Varela C. (CA2OPX) <patriciovarelacontreras@gmail.com>']
+    dialog.documenters = ['Patricio Varela C. (CA2OPX)']
+    dialog.artists = ['Patricio Varela C. (CA2OPX)']
+    dialog.license = "Seguimiento de Baterías se distribuye bajo la licencia MIT.\n\n" \
+                     "Copyright (c) 2023–2024 Patricio Varela C. (CA2OPX)\n\n" \
+                     "Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\n" \
+                     "The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\n" \
+                     "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
+    dialog.wrap_license = true
     dialog.set_logo_icon_name('seguimiento-baterias-pernostock')
     dialog.present
   end, expand: false, fill: true, padding: 0)
