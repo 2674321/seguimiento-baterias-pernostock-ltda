@@ -21,26 +21,39 @@ def create_interface(columns)
   configuracion = ConfiguracionCopiaSeguridad.new
   configuracion.start_backup_logic
   @_config_copia_seguridad = configuracion
+
   window = Gtk::Window.new('Ventana principal de búsqueda')
   window.set_position(Gtk::WindowPosition::CENTER)
-  window.set_size_request(560, 520)
-  main_box = Gtk::Box.new(:vertical, 5)
-  window.add(main_box)
+  window.set_size_request(640, 560)
+
+  revealer = Gtk::Revealer.new
+  revealer.transition_type = :crossfade
+  revealer.transition_duration = 600
+  revealer.set_margin_top(6)
+  revealer.set_margin_bottom(6)
+  revealer.set_margin_start(8)
+  revealer.set_margin_end(8)
+
+  main_box = Gtk::Box.new(:vertical, 6)
+  revealer.add(main_box)
+  window.add(revealer)
+
   header_box = Gtk::Box.new(:vertical, 2)
   header_box.set_border_width(10)
   title_label = Gtk::Label.new('Seguimiento de Baterías · PernoStock Ltda.')
-  title_label.name = 'brand'
   title_label.set_line_wrap(true)
   title_label.halign = :center
   subtitle_label = Gtk::Label.new('Consulta, registro, edición, copias de seguridad y estadísticas de baterías.')
-  subtitle_label.name = 'hint'
   subtitle_label.halign = :center
   header_box.pack_start(title_label, expand: false, fill: false, padding: 2)
   header_box.pack_start(subtitle_label, expand: false, fill: false, padding: 2)
   main_box.pack_start(header_box, expand: false, fill: true, padding: 2)
-  search_box = Gtk::Box.new(:horizontal, 5)
-  main_box.pack_start(search_box, expand: false, fill: true, padding: 5)
+
+  search_grid = Gtk::Grid.new
+  search_grid.column_spacing = 6
+  search_grid.row_spacing = 4
   entry_serie = Gtk::Entry.new
+  entry_serie.hexpand = true
   column_combo = Gtk::ComboBoxText.new
   columns.values.each { |col_name| column_combo.append_text(col_name) }
   column_combo.active = 0
@@ -52,20 +65,28 @@ def create_interface(columns)
   battery_button.set_size_request(30, 30)
   battery_button.label = "Ventana Baterias"
   battery_button.set_tooltip_text('Ventana con las Baterias Registradas.')
-  [Gtk::Label.new('Ingrese el valor a buscar:'), entry_serie,
-   Gtk::Label.new('Seleccione la columna:'), column_combo, menu_button, battery_button].each do |element|
-    search_box.pack_start(element, expand: false, fill: true, padding: 5)
-  end
+  search_grid.attach(Gtk::Label.new('Buscar en:'), 0, 0, 1, 1)
+  search_grid.attach(entry_serie, 1, 0, 1, 1)
+  search_grid.attach(Gtk::Label.new('Columna:'), 2, 0, 1, 1)
+  search_grid.attach(column_combo, 3, 0, 1, 1)
+  search_grid.attach(menu_button, 4, 0, 1, 1)
+  search_grid.attach(battery_button, 5, 0, 1, 1)
+  main_box.pack_start(search_grid, expand: false, fill: true, padding: 4)
   battery_button.signal_connect('clicked') do
     BatteryWindow.initialize_interface
   end
+
   result_box = Gtk::Box.new(:vertical, 5)
-  main_box.pack_start(result_box, expand: true, fill: true, padding: 5)
+  main_box.pack_start(result_box, expand: true, fill: true, padding: 4)
   result_label = Gtk::Label.new('', wrap: true, use_markup: true)
+  result_label.selectable = true
   scroll = Gtk::ScrolledWindow.new
   scroll.set_policy(:automatic, :automatic)
   scroll.add(result_label)
-  buttons_box = Gtk::Box.new(:horizontal, 5)
+
+  buttons_box = Gtk::ButtonBox.new(:horizontal)
+  buttons_box.layout = Gtk::ButtonBoxStyle::EXPAND
+  buttons_box.spacing = 4
   search_buttons = ['Buscar', 'Guardar'].map { |label| Gtk::Button.new(label: label) }
   set_button_icon(search_buttons[0], 'system-search')
   set_button_icon(search_buttons[1], 'document-save')
@@ -94,7 +115,6 @@ def create_interface(columns)
   search_buttons[0].signal_connect('clicked') do
     valor = entry_serie.text.strip
     index = column_combo.active
-
     if index.nil? || valor.empty?
       show_message_dialog("Error", "Por favor, seleccione una columna y escriba un valor para buscar.")
     else
@@ -119,12 +139,11 @@ def create_interface(columns)
   set_button_icon(registration_button, 'list-add')
   registration_button.set_tooltip_text('Haz clic aquí para abrir la ventana de Registro de baterías.')
   registration_button.signal_connect('clicked') { create_registration_window(window) }
-  buttons_box.pack_start(exit_button, expand: true, fill: true, padding: 5)
-  buttons_box.pack_start(backup_button, expand: true, fill: true, padding: 5)
-  buttons_box.pack_start(edit_button, expand: true, fill: true, padding: 5)
-  buttons_box.pack_start(registration_button, expand: true, fill: true, padding: 5)
-  registration_button.set_margin_right(50)
-  search_buttons.each { |btn| buttons_box.pack_start(btn, expand: true, fill: true, padding: 5) }
+  buttons_box.pack_start(exit_button, expand: true, fill: true, padding: 3)
+  buttons_box.pack_start(backup_button, expand: true, fill: true, padding: 3)
+  buttons_box.pack_start(edit_button, expand: true, fill: true, padding: 3)
+  buttons_box.pack_start(registration_button, expand: true, fill: true, padding: 3)
+  search_buttons.each { |btn| buttons_box.pack_start(btn, expand: true, fill: true, padding: 3) }
   exit_button.signal_connect('clicked') do
     window.destroy
   end
@@ -134,5 +153,10 @@ def create_interface(columns)
     Gtk.main_quit
   end
   window.show_all
+  revealer.reveal_child = false
+  GLib::Idle.add do
+    revealer.reveal_child = true
+    false
+  end
   window
 end
