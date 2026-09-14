@@ -59,7 +59,7 @@ def create_criteria_menu(menu_button, window)
   end, expand: false, fill: true, padding: 0)
 
   add_section.call('Herramientas')
-  menu_box.pack_start(build_item.call('Rango de Fecha', 'view-calendar-symbolic', 'Haz clic para seleccionar un rango de fecha') do
+  menu_box.pack_start(build_item.call('Rango de Fecha', 'appointment-new', 'Haz clic para seleccionar un rango de fecha') do
     LogicaMenuDateWindow.new.create_date_window
   end, expand: false, fill: true, padding: 0)
   menu_box.pack_start(build_item.call('Calendario', 'x-office-calendar-symbolic', 'Haz clic para acceder al calendario') do

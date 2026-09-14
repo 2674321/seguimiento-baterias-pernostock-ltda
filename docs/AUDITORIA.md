@@ -390,6 +390,27 @@ Verificación: `ruby -c` en `interface_setup.rb`, `criteria_menu.rb`, `configura
 
 Verificación: `ruby -c` OK en `interface_setup.rb`, `registration_window.rb`, `tabla_resultados.rb`, `statistics_logic.rb`, `statistics_data.rb`, `statistics_window.rb`, `user_manual.rb`, `main.rbw`. Grep sin referencias colgantes a `battery_window*` ni contadores eliminados. Smoke test headless (`test_merge_smoke.rb`): carga inicial 7 filas + status label, store 15 cols, menú contextual con 6 ítems, `eliminar_seleccion_interfaz` quita 1 fila, favoritos inserta divisor (fila 2), estadísticas 8 columnas, `create_interface` crea ventana con TreeView poblado (7 filas), botones Historial/Estadísticas presentes, sin botón baterías → RESULT=PASS. App real (X11): ventana "Ventana principal de búsqueda" 1200×560 IsViewable centrada, stderr sin errores, clic derecho abre menú contextual y búsqueda por teclado (YB3L → 2 filas: IDs 1 y 6) sin crash, app sigue viva.
 
+## Undécima pasada — reparación de iconos (GTK/desktop)
+
+**Diagnóstico**
+- Verificado en runtime con `Gtk::IconTheme.default` que, con el tema activo (`Mint-Y-Yaru`), dos iconos referenciados por botones **no resuelven**: `view-columns-symbolic` (botón "Columnas") y `view-calendar-symbolic` (item "Rango de Fecha"). (El fallback simbólico de Papirus no se aplica con este tema.)
+- El resto de nombres usados en la app (botones, menús, diálogos) resuelven correctamente (`system-search`, `document-save`, `view-list-symbolic`, `x-office-spreadsheet`, `application-exit`, `list-add`, `preferences-system-symbolic`, `help-about`, `x-office-calendar-symbolic`, `document-send-symbolic`, `view-refresh`).
+- El icono de la app (`seguimiento-baterias-pernostock`) estaba instalado en `~/.local/share/icons/hicolor` solo en 48/64/128/256 y **faltaba el icon-cache** (`icon-theme.cache`) → GTK caía al engranaje genérico (`application-x-executable`) en escritorio/menú.
+
+**Correcciones**
+- `interface_setup.rb`: `view-columns-symbolic` → `view-grid-symbolic` (resuelve: vista de rejilla para el selector de columnas).
+- `criteria_menu.rb`: `view-calendar-symbolic` → `appointment-new` (resuelve: icono de cita/calendario para "Rango de Fecha").
+- **Icono de la app rediseñado** (`brand/_assets/svg/icono.svg`): batería blanca con barra de carga verde y rayo ámbar sobre fondo azul redondeado (reemplaza el diseño anterior). Se eligieron colores sólidos (sin gradientes) para render robusto en cualquier rasterizador.
+- PNGs regenerados con GdkPixbuf/librsvg (16-bit gray de ImageMagick MSVG perdía los colores; librsvg los renderiza correctamente) y **instalados en los 7 tamaños** de hicolor (16/32/48/64/128/256/512).
+- `gtk-update-icon-cache -f -t ~/.local/share/icons/hicolor` + `update-desktop-database` → el `.desktop` (`Icon=seguimiento-baterias-pernostock`) ahora resuelve el nuevo icono.
+
+**Verificación**
+- Lista completa de nombres de icono usados en la app: **todos resuelven OK** vía `Gtk::IconTheme.default.lookup_icon`.
+- `ruby -c` OK en `interface_setup.rb` y `criteria_menu.rb`.
+- Smoke test (`test_merge_smoke.rb`) RESULT=PASS y app real (X11) sin errores tras los cambios.
+
+> Nota: si el icono del lanzador no se refresca al instante, reiniciar el panel/menú de la sesión de escritorio (Caja/Mint-Menu refrescan su propio cache).
+
 ## Pendiente/mejoras futuras (no bloqueantes)
 
 **Código duplicado restante (bajo riesgo, valor moderado)**

@@ -64,7 +64,7 @@ def create_interface(columns)
   create_criteria_menu(menu_button, window)
   columns_button = Gtk::Button.new
   columns_button.set_size_request(30, 30)
-  set_button_icon(columns_button, 'view-columns-symbolic')
+  set_button_icon(columns_button, 'view-grid-symbolic')
   columns_button.set_tooltip_text('Selecciona qué columnas mostrar en los resultados.')
   search_grid.attach(Gtk::Label.new('Buscar en:'), 0, 0, 1, 1)
   search_grid.attach(entry_serie, 1, 0, 1, 1)
