@@ -18,7 +18,29 @@ Sistema de escritorio para la gestión y seguimiento de baterías, desarrollado 
 
 ## Capturas
 
-![Ventana principal](assets/seguimiento_baterias_ventana_principal.png)
+### Ventana principal
+
+![Ventana principal](docs/screenshots/ventana_principal.png)
+
+### Registro de batería
+
+![Registro de batería](docs/screenshots/registro_de_bateria.png)
+
+### Configuración
+
+![Configuración](docs/screenshots/configuracion.png)
+
+### Selector de columnas
+
+![Selector de columnas](docs/screenshots/selector_de_columnas.png)
+
+### Pantalla de carga
+
+![Pantalla de carga](docs/screenshots/pantalla_de_carga.png)
+
+### Icono en el menú del SO
+
+![Icono en el menú del SO](docs/screenshots/icono_en_menu_de_OS.png)
 
 ## Stack
 
