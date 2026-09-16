@@ -16,6 +16,10 @@ Sistema de escritorio para la gestión y seguimiento de baterías, desarrollado 
 - Exportación de la base de datos a Excel.
 - Manual de usuario integrado (`user_manual.rb`).
 
+## Capturas
+
+![Ventana principal](assets/seguimiento_baterias_ventana_principal.png)
+
 ## Stack
 
 | Componente | Tecnología |
@@ -33,7 +37,7 @@ Sistema de escritorio para la gestión y seguimiento de baterías, desarrollado 
 ## Ejecución
 
 ```bash
-cd 15_seguimiento-baterias-pernostock-ltda
+cd seguimiento-baterias-pernostock-ltda
 mise install
 bundle install
 bundle exec ruby main.rbw
