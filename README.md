@@ -87,3 +87,7 @@ histórico original queda preservado en la rama `historico-monorepo-2024`. Ver
 ## Licencia
 
 MIT — ver [LICENSE](LICENSE).
+
+## Citación
+
+Metadatos de autoría y ORCID disponibles en [CITATION.cff](CITATION.cff).
