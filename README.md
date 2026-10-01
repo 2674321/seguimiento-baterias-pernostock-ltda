@@ -1,5 +1,7 @@
 # Seguimiento de Baterías — PernoStock Ltda.
 
+**Autor:** [Patricio Varela C.](https://github.com/2674321) · **ORCID:** [0009-0002-1087-9445](https://orcid.org/0009-0002-1087-9445) · **Licencia:** [MIT](LICENSE) · **Citación:** [CITATION.cff](CITATION.cff)
+
 Sistema de escritorio para la gestión y seguimiento de baterías, desarrollado en
 **Ruby 3.2.x + GTK3 + SQLite** (proyecto de formación, enero–febrero 2024).
 
