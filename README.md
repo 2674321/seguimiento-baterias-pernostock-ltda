@@ -1,5 +1,8 @@
 # Seguimiento de Baterías — PernoStock Ltda.
 
+<p align="center"><img src="docs/branding/app-icon.svg" width="150" alt="Icono minimalista de Seguimiento de Baterías"></p>
+
+
 **Autor:** [Patricio Varela C.](https://github.com/2674321) · **ORCID:** [0009-0002-1087-9445](https://orcid.org/0009-0002-1087-9445) · **Licencia:** [MIT](LICENSE) · **Citación:** [CITATION.cff](CITATION.cff)
 
 Sistema de escritorio para la gestión y seguimiento de baterías, desarrollado en
