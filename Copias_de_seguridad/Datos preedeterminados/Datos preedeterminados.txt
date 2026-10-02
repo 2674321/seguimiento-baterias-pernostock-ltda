@@ -1,0 +1,5 @@
+Este archivo es un ejemplo sintético. La base de datos real de PernoStock se
+gestiona fuera de Git y no debe versionarse. Los datos de esta copia de
+demostración son inventados y no corresponden a recepciones ni baterías reales.
+
+06-02-2024
