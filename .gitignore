@@ -12,6 +12,11 @@ Thumbs.db
 
 # Datos reales de PernoStock — NO versionar
 Copias_de_seguridad/Datos preedeterminados/base_de_datos.db
+# Fuentes/importaciones operativas reales (Excel/CSV/DB): nunca al repositorio
+*.xlsx
+*.xls
+*.csv
+*.db
 
 # Datos en tiempo de ejecución (se regeneran al usar la app)
 base_de_datos.db

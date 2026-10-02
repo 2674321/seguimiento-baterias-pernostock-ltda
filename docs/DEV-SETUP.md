@@ -58,8 +58,10 @@ DISPLAY=:0 mise exec -- bundle exec ruby _scripts/dev/prueba_interfaz.rb
 
 ## Datos de prueba / demo
 
-- NO usar la base `Copias_de_seguridad/Datos preedeterminados/base_de_datos.db`
-  (contiene **datos reales** de PernoStock; se conserva solo como plantilla histórica).
+- La base `Copias_de_seguridad/Datos preedeterminados/base_de_datos.db` **no está
+  versionada**. `Datos preedeterminados.txt` es un ejemplo sintético; los datos
+  reales de PernoStock viven fuera del repositorio y nunca se versionan
+  (ver `.gitignore`).
 - Para probar se usa una base **vacía** que la app crea al arrancar (`base_de_datos.db`,
   ignorada por git). Con el arranque se crean las tablas `tabla_de_datos`,
   `tabla_de_registro` y `flag_de_creacion_de_tabla`.
